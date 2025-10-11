@@ -1,67 +1,76 @@
 # 🅿️ ParkingHole
 
-**ParkingHole** es un proyecto de Trabajo Fin de Grado (TFG) orientado al desarrollo de una aplicación que facilite la búsqueda, reserva y oferta de plazas de aparcamiento en entornos urbanos y privados dentro de España.
+**ParkingHole** is a Final Degree Project (TFG) focused on the development of an application that facilitates the search, reservation, and offering of parking spaces in both urban areas and private parking lots across Spain.
 
-El objetivo principal es **optimizar el tiempo y el espacio** en las ciudades, permitiendo que los usuarios compartan o encuentren plazas de parking disponibles de manera sencilla, rápida y segura.
-
----
-
-## 🧭 Descripción general
-
-En muchas ciudades españolas, encontrar aparcamiento supone una pérdida constante de tiempo, combustible y paciencia.  
-**ParkingHole** busca ofrecer una solución práctica a este problema mediante una plataforma colaborativa donde:
-
-- Los usuarios puedan **ofrecer sus plazas libres** durante un periodo determinado.  
-- Otros conductores puedan **reservarlas** mediante un pequeño micropago.  
-- Todo ello con un sistema que fomente la **confianza, la eficiencia y el uso compartido** de recursos.
+The main goal is to **optimize time and space** in cities by allowing users to share or find available parking spots in a simple, fast, and secure way.
 
 ---
 
-## 🇪🇸 Alcance inicial
+## 🧭 General Overview
 
-El proyecto comenzará su desarrollo y validación **en territorio español**, con especial atención a las necesidades de los entornos urbanos y centros comerciales.  
-A medio plazo, se plantea una posible expansión a otros países europeos con problemáticas similares de estacionamiento.
+In many Spanish cities, finding a parking space represents a constant loss of time, fuel, and patience.  
+**ParkingHole** aims to provide a practical solution to this problem through a collaborative platform where:
 
----
-
-## 🎯 Objetivos principales
-
-- Reducir el tiempo que los conductores invierten buscando aparcamiento.  
-- Fomentar una **economía colaborativa** entre usuarios.  
-- Promover un uso más racional de los espacios disponibles en las ciudades.  
-- Servir como base tecnológica para futuras integraciones con **servicios de movilidad inteligente**.
+- Users can **offer their free parking spaces** for a specific period.  
+- Other drivers can **reserve them** through a small micropayment.  
+- The entire system promotes **trust, efficiency, and resource sharing** between users.
 
 ---
 
-## 💡 Estado actual del proyecto
+## 🇪🇸 Initial Scope
 
-Este repositorio se crea como punto de partida para el **Trabajo Fin de Grado en Informática**.  
-Actualmente se encuentra en fase de **diseño conceptual y prototipado**, centrado en:
-
-- Definir la experiencia de usuario (UX/UI).  
-- Especificar los flujos principales de reserva, oferta y validación.  
-- Recoger sugerencias e ideas para la futura implementación.  
+The project will begin its development and validation **within Spain**, with a special focus on urban areas and shopping centers.  
+In the medium term, an expansion to other European countries with similar parking challenges may be considered.
 
 ---
 
-## 🤝 Cómo contribuir
+## 🎯 Main Objectives
 
-Si te interesa colaborar o aportar ideas sobre la experiencia de usuario, diseño o validación del sistema, puedes hacerlo mediante:
-
-- Comentarios y sugerencias en los *issues* del repositorio.  
-- Propuestas de mejora relacionadas con la interacción, accesibilidad o usabilidad.  
-- Feedback sobre posibles casos de uso dentro del contexto español.
-
-> ⚠️ Este repositorio no busca todavía la implementación técnica del proyecto,  
-> sino consolidar la **visión general y conceptual** de la aplicación.
+- Reduce the time drivers spend searching for parking.  
+- Encourage a **collaborative economy** among users.  
+- Promote a more rational use of existing parking spaces.  
+- Serve as a technological foundation for future integration with **smart mobility services**.
 
 ---
 
-## 🧾 Licencia
+## 💡 Current Project Status
 
-Este proyecto se publica con fines **académicos y de investigación** dentro del marco de un TFG.  
-El contenido y los materiales asociados están protegidos por derechos de autor del autor del proyecto (© 2025 Alex Freire).
+This repository is created as the starting point for the **Final Degree Project in Computer Science**.  
+It is currently in the **conceptual design and prototyping phase**, focused on:
+
+- Defining the user experience (UX/UI).  
+- Specifying the main flows for reservation, offering, and validation.  
+- Collecting suggestions and ideas for future implementation.
 
 ---
 
-📍 *ParkingHole – Proyecto académico y con posibilidad a futuro profesional de aplicación colaborativa para encontrar aparcamiento en España.*
+## 🤝 How to Contribute
+
+If you’re interested in contributing ideas or feedback about user experience, design, or system validation, you can do so by:
+
+- Leaving comments and suggestions in the repository’s *issues* section.  
+- Proposing improvements related to interaction, accessibility, or usability.  
+- Providing feedback on potential use cases within the Spanish context.
+
+> ⚠️ This repository is **not yet intended for technical implementation**,  
+> but rather to consolidate the **overall vision and concept** of the application.
+
+---
+
+## 🧾 License
+
+This project is published for **academic and research purposes** as part of a Final Degree Project.  
+All content and related materials are protected under the copyright of the project’s author (© 2025 Alex Freire).
+
+---
+
+## 🌍 Future Vision
+
+While **ParkingHole** begins as an academic project based in Spain,  
+its concept and structure are designed with **global scalability** in mind.  
+In the future, it could evolve into a large-scale international platform,  
+helping cities around the world **reduce congestion, optimize space usage, and promote sustainable urban mobility.**
+
+---
+
+📍 *ParkingHole – Academic project for a collaborative parking application in Spain, with the potential to grow into a worldwide initiative.*
