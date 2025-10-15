@@ -66,10 +66,7 @@ All content and related materials are protected under the copyright of the proje
 
 ## 🌍 Future Vision
 
-While **ParkingHole** begins as an academic project based in Spain,  
-its concept and structure are designed with **global scalability** in mind.  
-In the future, it could evolve into a large-scale international platform,  
-helping cities around the world **reduce congestion, optimize space usage, and promote sustainable urban mobility.**
+While **ParkingHole** begins as an academic project based in Spain, its concept and structure are designed with **global scalability** in mind. In the future, it could evolve into a large-scale international platform, helping cities around the world **reduce congestion, optimize space usage, and promote sustainable urban mobility.**
 
 ---
 
