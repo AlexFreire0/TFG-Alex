@@ -109,7 +109,7 @@ Sigue estos pasos para levantar el ecosistema ParkingHole en tu entorno local:
 ## 👨‍💻 Autoría y Licencia
 
 **Trabajo de Fin de Grado (TFG)**
-Desarrollado y diseñado íntegramente por **Alejandro Freire (AlexFreire0)**.
+Desarrollado y diseñado íntegramente por **Alex Freire (AlexFreire0)**.
 
 Este proyecto se realiza con fines académicos y comerciales. Todos los derechos sobre la propiedad intelectual, código fuente, diseño arquitectónico e imagen de marca de **ParkingHole** se encuentran reservados. 
 Para verificar las atribuciones formales de autoría, consultar el archivo [`AUTHORSHIP_PROOF.md`](./AUTHORSHIP_PROOF.md) anexado a este repositorio.
