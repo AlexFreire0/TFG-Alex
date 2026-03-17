@@ -5,6 +5,12 @@ plugins {
     id("kotlin-parcelize")               // Mantén este para pasar objetos entre pantallas
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
 android {
 
     buildFeatures {
@@ -20,7 +26,7 @@ android {
         targetSdk 36
         versionCode 1
         versionName "1.0"
-        manifestPlaceholders["MAPS_API_KEY"] = "AIzaSyDFD416oMSc-S8k31mYcyE8xmqmftQUY3I"
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
