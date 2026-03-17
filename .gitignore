@@ -1,0 +1,83 @@
+# ==============================================================================
+# 🛡️ PARKINGHOLE ROOT .GITIGNORE (MONOREPO)
+# ==============================================================================
+
+# ==============================================================================
+# 1. 🛑 SEGURIDAD Y SECRETOS (¡NUNCA SUBIR A GIT!)
+# ==============================================================================
+# Propiedades y variables de entorno del Backend (Base de datos, Stripe, etc.)
+Api_ParkingHole/src/main/resources/application.properties
+Api_ParkingHole/src/main/resources/application.yml
+Api_ParkingHole/src/main/resources/application-*.properties
+Api_ParkingHole/src/main/resources/application-*.yml
+Api_ParkingHole/.env
+Api_ParkingHole/*.env
+
+# Propiedades locales del Frontend (API Keys de Google Maps, Stripe Publishable)
+TFG_app/local.properties
+
+# Archivos de configuración de Firebase (Contiene IDs y URLs críticos del proyecto)
+TFG_app/app/google-services.json
+
+# Keystores y firmas de Android (Claves criptográficas para subir a Google Play)
+*.jks
+*.keystore
+TFG_app/app/release-key.keystore
+TFG_app/app/debug.keystore
+
+# ==============================================================================
+# 2. ☕ BACKEND (SPRING BOOT / MAVEN)
+# ==============================================================================
+Api_ParkingHole/target/
+Api_ParkingHole/out/
+Api_ParkingHole/logs/
+Api_ParkingHole/*.log
+Api_ParkingHole/.mvn/wrapper/maven-wrapper.jar
+
+# ==============================================================================
+# 3. 📱 FRONTEND (ANDROID / KOTLIN / GRADLE)
+# ==============================================================================
+# Carpetas de construcción
+TFG_app/build/
+TFG_app/app/build/
+TFG_app/.gradle/
+
+# Binarios generados
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.jar
+*.so
+*.aar
+
+# Archivos temporales de compilación nativa y Profiler
+TFG_app/captures/
+TFG_app/.externalNativeBuild/
+TFG_app/.cxx/
+
+# ==============================================================================
+# 4. 🛠️ IDEs (INTELLIJ, VISUAL STUDIO CODE, ANDROID STUDIO)
+# ==============================================================================
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.iws
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# ==============================================================================
+# 5. 💻 SISTEMAS OPERATIVOS (MAC / WINDOWS / LINUX)
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/

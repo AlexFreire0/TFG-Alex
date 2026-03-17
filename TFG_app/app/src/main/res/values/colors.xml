@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors (Blue Palette) -->
+    <color name="colorPrimary">#1976D2</color>
+    <color name="colorPrimaryVariant">#0D47A1</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    
+    <color name="colorSecondary">#42A5F5</color>
+    <color name="colorSecondaryVariant">#1E88E5</color>
+    <color name="colorOnSecondary">#000000</color>
+
+    <!-- Background and Surface colors -->
+    <color name="colorBackground">#F5F5F5</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorError">#B00020</color>
+    
+    <color name="colorOnBackground">#121212</color>
+    <color name="colorOnSurface">#121212</color>
+    <color name="colorOnError">#FFFFFF</color>
+
+    <!-- Legacy Colors (Light Mode) - Mantienen sus valores literales -->
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="colorGray">#888888</color>
+    <color name="colorDarkGray">#333333</color>
+    <color name="backgroundLight">#F5F5F5</color>
+    <color name="textPrimaryDark">#121212</color>
+    <color name="textSecondary">#666666</color>
+
+    <color name="successGreen">#4CAF50</color>
+    <color name="errorRed">#F44336</color>
+    
+    <!-- UI Elements -->
+    <color name="textColorPrimary">#121212</color>
+    <color name="textColorSecondary">#5F6368</color>
+    <color name="iconTint">#5F6368</color>
+</resources>

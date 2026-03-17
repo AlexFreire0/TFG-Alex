@@ -1,0 +1,77 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services") // Este es el que te pide Firebase
+    id("kotlin-parcelize")               // Mantén este para pasar objetos entre pantallas
+}
+
+android {
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    namespace = 'com.example.tfg'
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId "com.example.tfg"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+        manifestPlaceholders["MAPS_API_KEY"] = "AIzaSyDFD416oMSc-S8k31mYcyE8xmqmftQUY3I"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    // --- FIREBASE (Configuración ParkingHole) ---
+    // Importa el BoM (Bill of Materials) para gestionar versiones automáticamente
+    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth") // Necesario para gestionar la sesión
+
+    // --- GOOGLE SIGN-IN ---
+    // Librería específica para que el botón de Google funcione
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // --- BÁSICOS PARA UI Y XML ---
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Librerías de sistema (Kotlin y Ciclo de vida)
+    implementation(libs.activity)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.lifecycle.runtime.ktx)
+
+    // --- RETROFIT & GSON (Comunicación con Spring Boot) ---
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // --- Mapas de google y ubicacion
+    implementation(libs.play.services.maps)
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // --- TESTING ---
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    //Pagos
+    implementation("com.stripe:stripe-android:22.5.0")}

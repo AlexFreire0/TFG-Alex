@@ -1,0 +1,24 @@
+# -------------------------------------------------------------
+# 🛡️ PLANTILLA SEGURA DE CONFIGURACIÓN (application.properties)
+# -------------------------------------------------------------
+# Instrucciones:
+# 1. Copia este archivo y renómbralo a 'application.properties'
+# 2. Rellena los valores reales de tu entorno local/producción.
+# 3. ¡NUNCA subas el archivo 'application.properties' real a Git! El .gitignore ya lo protege.
+
+# --- CONFIGURACIÓN DEL SERVIDOR ---
+server.port=8080
+
+# --- BASE DE DATOS (POSTGRESQL) ---
+spring.datasource.url=jdbc:postgresql://localhost:5432/parkinghole_db
+spring.datasource.username=TU_USUARIO_DB
+spring.datasource.password=TU_CONTRASEÑA_DB
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# --- SEGURIDAD Y STRIPE ---
+# Llave secreta de Stripe (Empieza por sk_test_ o sk_live_)
+stripe.api-key=sk_test_TU_CLAVE_SECRETA_DE_STRIPE
+
+# JWT Secret (Si implementas tokens JWT para las sesiones en el futuro)
+# jwt.secret=TU_SUPER_SECRETO_PARA_FIRMAR_TOKENS_JWT_MUY_LARGO

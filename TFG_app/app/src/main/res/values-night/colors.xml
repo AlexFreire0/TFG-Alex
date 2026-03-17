@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors (Blue Palette desaturated for Dark Mode) -->
+    <color name="colorPrimary">#90CAF9</color>
+    <color name="colorPrimaryVariant">#1976D2</color>
+    <color name="colorOnPrimary">#000000</color>
+    
+    <color name="colorSecondary">#64B5F6</color>
+    <color name="colorSecondaryVariant">#42A5F5</color>
+    <color name="colorOnSecondary">#000000</color>
+
+    <!-- Background and Surface colors (Uber Dark Mode style) -->
+    <color name="colorBackground">#121212</color>
+    <color name="colorSurface">#1F1F1F</color>
+    <color name="colorError">#CF6679</color>
+    
+    <color name="colorOnBackground">#FFFFFF</color>
+    <color name="colorOnSurface">#FFFFFF</color>
+    <color name="colorOnError">#000000</color>
+
+    <!-- Legacy Colors mapped to Dark Mode (Inverted values for contrast fix) -->
+    <color name="colorWhite">#1F1F1F</color> <!-- En dark mode el blanco es gris oscuro -->
+    <color name="white">#1F1F1F</color> <!-- En dark mode el blanco es gris oscuro -->
+    <color name="black">#FFFFFF</color> <!-- El negro pasa a blanco -->
+    <color name="colorGray">#A0A0A0</color>
+    <color name="colorDarkGray">#CCCCCC</color>
+    <color name="backgroundLight">#121212</color> <!-- El fondo claro se oscurece -->
+    <color name="textPrimaryDark">#FFFFFF</color> <!-- Texto principal oscuro a blanco -->
+    <color name="textSecondary">#B3B3B3</color>
+
+    <color name="successGreen">#4CAF50</color>
+    <color name="errorRed">#F44336</color>
+    
+    <!-- UI Elements -->
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="textColorSecondary">#B3B3B3</color>
+    <color name="iconTint">#FFFFFF</color>
+</resources>
