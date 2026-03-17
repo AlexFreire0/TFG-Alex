@@ -1,6 +1,7 @@
 <div align="center">
 
-  <img src="assets/images/ParkingHole_logo_sample.png" alt="Logo de ParkingHole" width="25%" style="margin-right: 15px;" />
+  <img src="assets/images/ParkingHole_logo_sample.png" alt="Logo de ParkingHole" width="150" />
+  
 # 🚗 ParkingHole
 **El ecosistema inteligente para el intercambio de plazas de aparcamiento.**
 
