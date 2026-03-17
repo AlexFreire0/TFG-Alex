@@ -95,9 +95,9 @@ Sigue estos pasos para levantar el ecosistema ParkingHole en tu entorno local:
 <div align="center">
   <!-- Reemplaza los enlaces (src) con las rutas relativas de tus imágenes o GIFs -->
   
-  <img src="https://via.placeholder.com/250x500.png?text=Login+Screen" alt="Pantalla de Login" width="25%" style="margin-right: 15px;" />
-  <img src="https://via.placeholder.com/250x500.png?text=Mapa+Interactivo" alt="Mapa de Aparcamientos" width="25%" style="margin-right: 15px;" />
-  <img src="https://via.placeholder.com/250x500.png?text=Mis+Coches" alt="Gestión de Vehículos" width="25%" />
+  <img src="assets/images/ParkingHole_login_sample.jpg" alt="Pantalla de Login" width="25%" style="margin-right: 15px;" />
+  <img src="assets/images/ParkingHole_map_sample.jpg" alt="Mapa de Aparcamientos" width="25%" style="margin-right: 15px;" />
+  <img src="assets/images/ParkingHole_cars_sample.jpg" alt="Gestión de Vehículos" width="25%" />
   
   <br/>
   <i>Demo de la aplicación: (Izquierda) Login fluido con Google, (Centro) Mapa inmersivo de búsqueda, (Derecha) Garaje de vehículos registrados.</i>

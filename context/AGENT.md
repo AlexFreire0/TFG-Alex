@@ -17,7 +17,9 @@ This file is the single source of truth for an AI Agent operating within the Par
    - The Android UI components (Adapters, XML) to reflect the new data.
 3. **Session Management:** Avoid hardcoding user IDs. Always use the central `SessionManager.kt` referencing `SharedPreferences` to fetch the current logged-in user ID for API calls.
 4. **UI Reactivity over Backend Complexity:** If a purely visual constraint applies (e.g., maximum 2 cars per user), handle the visual warnings (like hiding Floating Action Buttons and showing MaterialCardViews) in the Android Fragments/XML, without necessarily cluttering the backend with UI-specific logic.
-5. **Always Update Context:** If you introduce major architectural changes, new libraries, or fix a significant recurring bug, UPDATE this `AGENT.md` file and `README.md` to reflect the new knowledge.
+5. **Always Update Context (Internal & Public):** 
+   - INTERNAL: If you introduce major architectural changes, new libraries, or fix a significant recurring bug, UPDATE this `AGENT.md` file to reflect the new knowledge and prevent future errors.
+   - PUBLIC: Ensure the root `README.md` is kept up-to-date with any new features, tech stack modifications, or implementation details. The `README.md` serves as the public face of the project and must reflect the current state of the application.
 
 ## 3. Historical Issues & Solutions (Lessons Learned)
 - **Google Auth Flows & Logout:** 
