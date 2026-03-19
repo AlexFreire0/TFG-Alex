@@ -13,6 +13,10 @@ Api_ParkingHole/src/main/resources/application-*.yml
 Api_ParkingHole/.env
 Api_ParkingHole/*.env
 
+# Firebase Admin SDK (Backend)
+Api_ParkingHole/src/main/resources/firebase-service-account.json
+**/firebase-service-account.json
+
 # Propiedades locales del Frontend (API Keys de Google Maps, Stripe Publishable)
 TFG_app/local.properties
 
