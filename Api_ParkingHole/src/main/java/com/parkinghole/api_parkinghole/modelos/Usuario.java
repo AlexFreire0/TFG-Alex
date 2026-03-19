@@ -58,6 +58,9 @@ public class Usuario {
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     // (Recuerda generar sus getters y setters si no usas Lombok)
 
     @PrePersist

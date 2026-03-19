@@ -53,9 +53,14 @@ class RegisterActivity : AppCompatActivity() {
         // CORRECCIÓN: Llamamos directamente a getApiService() sin usar .instance
         val apiService = RetrofitClient.getApiService()
 
-        apiService.registrarUsuario(usuario).enqueue(object : Callback<Usuario> {
-            override fun onResponse(call: Call<Usuario>, response: Response<Usuario>) {
+        apiService.registrarUsuario(usuario).enqueue(object : Callback<com.example.tfg.models.AuthResponse> {
+            override fun onResponse(call: Call<com.example.tfg.models.AuthResponse>, response: Response<com.example.tfg.models.AuthResponse>) {
                 if (response.isSuccessful) {
+                    val authResponse = response.body()
+                    if (authResponse != null) {
+                        // Opcional: Auto-login guardando la sesión aquí. Si no, el usuario tendrá que hacer login manual.
+                        // com.example.tfg.utils.SessionManager.guardarSesion(this@RegisterActivity, authResponse.token, authResponse.usuario)
+                    }
                     Toast.makeText(this@RegisterActivity, "Registro exitoso", Toast.LENGTH_SHORT).show()
                     finish()
                 } else {
@@ -63,7 +68,7 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<Usuario>, t: Throwable) {
+            override fun onFailure(call: Call<com.example.tfg.models.AuthResponse>, t: Throwable) {
                 Toast.makeText(this@RegisterActivity, "Error de conexión: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

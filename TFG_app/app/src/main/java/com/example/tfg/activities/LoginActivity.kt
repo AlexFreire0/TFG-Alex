@@ -25,6 +25,22 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // --- 0. SILENT LOGIN ---
+        val token = com.example.tfg.utils.SessionManager.getToken(this)
+        if (token != null) {
+            if (!com.example.tfg.utils.SessionManager.isTokenExpired(token)) {
+                val intent = Intent(this, InicioActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+                return
+            } else {
+                Log.w("LOGIN", "Token expirado. Limpiando sesión local.")
+                com.example.tfg.utils.SessionManager.cerrarSesion(this)
+            }
+        }
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -87,13 +103,23 @@ class LoginActivity : AppCompatActivity() {
 
         val apiService = RetrofitClient.getApiService()
 
-        apiService.loginConGoogle(usuarioGoogle).enqueue(object : Callback<Usuario> {
-            override fun onResponse(call: Call<Usuario>, response: Response<Usuario>) {
+        apiService.loginConGoogle(usuarioGoogle).enqueue(object : Callback<com.example.tfg.models.AuthResponse> {
+            override fun onResponse(call: Call<com.example.tfg.models.AuthResponse>, response: Response<com.example.tfg.models.AuthResponse>) {
                 if (response.isSuccessful) {
-                    val usuarioBackend = response.body()
-                    if (usuarioBackend != null) {
+                    val authResponse = response.body()
+                    if (authResponse != null) {
+                        val token = authResponse.token
+                        val usuarioBackend = authResponse.usuario
+
+                        if (token.isNullOrEmpty() || usuarioBackend == null) {
+                            Log.e("LOGIN_ERROR", "Token o usuario nulo desde el backend")
+                            Toast.makeText(this@LoginActivity, "Error: Datos de sesión inválidos", Toast.LENGTH_SHORT).show()
+                            mGoogleSignInClient.signOut()
+                            return
+                        }
+
                         // d) SOLO DENTRO del onResponse exitoso de Retrofit usar el usuario devuelto
-                        com.example.tfg.utils.SessionManager.guardarSesion(this@LoginActivity, usuarioBackend)
+                        com.example.tfg.utils.SessionManager.guardarSesion(this@LoginActivity, token, usuarioBackend)
                         
                         // e) Después de guardar la sesión, hacer el startActivity y finish
                         val intent = Intent(this@LoginActivity, InicioActivity::class.java)
@@ -106,7 +132,7 @@ class LoginActivity : AppCompatActivity() {
                     mGoogleSignInClient.signOut()
                 }
             }
-            override fun onFailure(call: Call<Usuario>, t: Throwable) {
+            override fun onFailure(call: Call<com.example.tfg.models.AuthResponse>, t: Throwable) {
                 Log.e("RETROFIT_ERROR", t.message ?: "Error desconocido")
                 Toast.makeText(this@LoginActivity, "Sin conexión", Toast.LENGTH_SHORT).show()
             }
@@ -116,13 +142,22 @@ class LoginActivity : AppCompatActivity() {
     private fun realizarLoginBackend(usuario: Usuario) {
         val apiService = RetrofitClient.getApiService()
 
-        apiService.login(usuario).enqueue(object : Callback<Usuario> {
-            override fun onResponse(call: Call<Usuario>, response: Response<Usuario>) {
+        apiService.login(usuario).enqueue(object : Callback<com.example.tfg.models.AuthResponse> {
+            override fun onResponse(call: Call<com.example.tfg.models.AuthResponse>, response: Response<com.example.tfg.models.AuthResponse>) {
                 if (response.isSuccessful) {
-                    val usuarioBackend = response.body()
-                    if (usuarioBackend != null) {
+                    val authResponse = response.body()
+                    if (authResponse != null) {
+                        val token = authResponse.token
+                        val usuarioBackend = authResponse.usuario
+
+                        if (token.isNullOrEmpty() || usuarioBackend == null) {
+                            Log.e("LOGIN_ERROR", "Token o usuario nulo desde el backend")
+                            Toast.makeText(this@LoginActivity, "Error: Datos de sesión inválidos", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+
                         // Guardar la sesión con el usuario validado
-                        com.example.tfg.utils.SessionManager.guardarSesion(this@LoginActivity, usuarioBackend)
+                        com.example.tfg.utils.SessionManager.guardarSesion(this@LoginActivity, token, usuarioBackend)
                         
                         // Navegar a la pantalla principal
                         val intent = Intent(this@LoginActivity, InicioActivity::class.java)
@@ -134,7 +169,7 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this@LoginActivity, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
                 }
             }
-            override fun onFailure(call: Call<Usuario>, t: Throwable) {
+            override fun onFailure(call: Call<com.example.tfg.models.AuthResponse>, t: Throwable) {
                 Toast.makeText(this@LoginActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

@@ -161,7 +161,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     // --- NUEVO: PREPARAR EL PAGO CON SPRING BOOT ---
     private fun iniciarPagoStripe(plaza: Intercambio, btnConfirmar: Button) {
         val requestData = PagoRequest(
-            precioTotal = plaza.precioTotalComprador,
+            idIntercambio = plaza.id ?: 0L,
             idUsuario = usuarioLogueado?.uid ?: 0L,
             idVendedor = plaza.idVendedor
         )

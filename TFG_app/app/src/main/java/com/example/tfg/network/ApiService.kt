@@ -14,15 +14,17 @@ import retrofit2.Response
 import okhttp3.ResponseBody
 
 interface ApiService {
-    // Añadimos "api/" al principio de cada ruta de usuarios
     @POST("api/usuarios/registro")
-    fun registrarUsuario(@Body usuario: Usuario): Call<Usuario>
+    fun registrarUsuario(@Body usuario: Usuario): Call<AuthResponse>
 
     @POST("api/usuarios/login")
-    fun login(@Body usuario: Usuario): Call<Usuario>
+    fun login(@Body usuario: Usuario): Call<AuthResponse>
 
     @POST("api/usuarios/google-login")
-    fun loginConGoogle(@Body usuario: Usuario): Call<Usuario>
+    fun loginConGoogle(@Body usuario: Usuario): Call<AuthResponse>
+
+    @retrofit2.http.PUT("api/usuarios/actualizar-fcm")
+    suspend fun actualizarFcm(@Query("token") token: String): Response<Unit>
 
     // Esta ya estaba bien configurada
     @GET("api/intercambios/disponibles")

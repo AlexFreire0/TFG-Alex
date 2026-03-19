@@ -1,14 +1,22 @@
 package com.parkinghole.api_parkinghole.controladores;
 
+import com.parkinghole.api_parkinghole.modelos.Intercambio;
+import com.parkinghole.api_parkinghole.modelos.PagoRequest;
 import com.parkinghole.api_parkinghole.modelos.PagoResponse;
 import com.parkinghole.api_parkinghole.modelos.Usuario;
+import com.parkinghole.api_parkinghole.repositorio.IntercambioRepositorio;
 import com.parkinghole.api_parkinghole.repositorio.UsuarioRepositorio;
+import com.parkinghole.api_parkinghole.servicios.NotificationService;
 import com.stripe.Stripe;
 import com.stripe.model.Account;
 import com.stripe.model.AccountLink;
 import com.stripe.model.Customer;
 import com.stripe.model.EphemeralKey;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
+import com.stripe.model.StripeObject;
+import com.stripe.net.Webhook;
 import com.stripe.param.AccountCreateParams;
 import com.stripe.param.AccountLinkCreateParams;
 import com.stripe.param.CustomerCreateParams;
@@ -32,8 +40,17 @@ public class PagoControlador {
     @Value("${stripe.api.key}")
     private String stripeApiKey;
 
+    @Value("${stripe.webhook.secret}")
+    private String endpointSecret; // ¡Añadir a application.properties!
+
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
+    
+    @Autowired
+    private IntercambioRepositorio intercambioRepositorio;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostConstruct
     public void init() {
@@ -41,29 +58,35 @@ public class PagoControlador {
     }
 
     @PostMapping("/crear-payment-sheet")
-    public ResponseEntity<?> crearPaymentSheet(@RequestBody Map<String, Object> data) {
+    public ResponseEntity<?> crearPaymentSheet(@RequestBody PagoRequest request) {
         try {
-            // 1. Recibir datos base
-            Double precioVendedor = Double.valueOf(data.get("precioTotal").toString());
-            Long idComprador = Long.valueOf(data.get("idUsuario").toString());
-            Long idVendedor = Long.valueOf(data.get("idVendedor").toString());
+            Long idIntercambio = request.getIdIntercambio();
+            Long idComprador = request.getIdUsuario();
+            Long idVendedor = request.getIdVendedor();
 
-            // 2. Buscar usuarios
+            // 1. Buscar entidades reales
+            Intercambio intercambio = intercambioRepositorio.findById(idIntercambio)
+                    .orElseThrow(() -> new Exception("Intercambio no encontrado"));
+
+            if (!"Esperando".equals(intercambio.getEstadoIntercambio())) {
+                 return ResponseEntity.badRequest().body("Esta plaza ya no está disponible para reserva.");
+            }
+
             Usuario comprador = usuarioRepositorio.findById(idComprador)
                     .orElseThrow(() -> new Exception("Comprador no encontrado"));
             Usuario vendedor = usuarioRepositorio.findById(idVendedor)
                     .orElseThrow(() -> new Exception("Vendedor no encontrado"));
 
-            // 3. --- LÓGICA DE RENTABILIDAD (SUMAR COMISIÓN) ---
-            // Queremos que el vendedor reciba su precio íntegro.
-            // Sumamos tu 15% + 0.35€ fijos para cubrir la comisión de Stripe.
-            Double comisionApp = precioVendedor * 0.15;
-            Double precioFinalComprador = precioVendedor + comisionApp + 0.35;
+            // 2. --- LÓGICA DE RENTABILIDAD SEGURA ---
+            // Leemos el precio REAL de la base de datos, ¡inmune a hackeos del APK!
+            Double precioVendedorReal = intercambio.getPrecioTotalComprador();
+            Double comisionApp = precioVendedorReal * 0.15;
+            Double precioFinalComprador = precioVendedorReal + comisionApp + 0.35;
 
             Long montoTotalCentimos = Math.round(precioFinalComprador * 100);
             Long comisionTotalCentimos = Math.round((comisionApp + 0.35) * 100);
 
-            // 4. Gestionar Customer (Comprador)
+            // 3. Gestionar Customer (Comprador)
             String stripeCustomerId = comprador.getStripeCustomerId();
             if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
                 CustomerCreateParams customerParams = CustomerCreateParams.builder()
@@ -76,28 +99,28 @@ public class PagoControlador {
                 usuarioRepositorio.save(comprador);
             }
 
-            // 5. Crear Ephemeral Key
+            // 4. Crear Ephemeral Key
             EphemeralKeyCreateParams ephemeralKeyParams = EphemeralKeyCreateParams.builder()
                     .setStripeVersion("2023-10-16")
                     .setCustomer(stripeCustomerId)
                     .build();
             EphemeralKey ephemeralKey = EphemeralKey.create(ephemeralKeyParams);
 
-            // 6. Configurar el Pago con Captura Manual (Escrow)
+            // 5. Configurar el Pago
             PaymentIntentCreateParams.Builder paramsBuilder = PaymentIntentCreateParams.builder()
                     .setAmount(montoTotalCentimos)
                     .setCurrency("eur")
                     .setCustomer(stripeCustomerId)
-                    // RETENCIÓN: El dinero se bloquea pero no se cobra aún
-                    .setCaptureMethod(PaymentIntentCreateParams.CaptureMethod.MANUAL)
+                    .setCaptureMethod(PaymentIntentCreateParams.CaptureMethod.MANUAL) // Retención
                     .setSetupFutureUsage(PaymentIntentCreateParams.SetupFutureUsage.OFF_SESSION)
+                    .putMetadata("intercambio_id", String.valueOf(idIntercambio)) // <-- VITAL PARA EL WEBHOOK
+                    .putMetadata("vendedor_email", vendedor.getCorreo()) // <-- NUEVO PARA NOTIFICACIÓN PUSH
                     .setAutomaticPaymentMethods(
                             PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                                     .setEnabled(true)
                                     .build()
                     );
 
-            // Configurar reparto si el vendedor tiene cuenta Connect
             if (vendedor.getStripeConnectId() != null && !vendedor.getStripeConnectId().isEmpty()) {
                 paramsBuilder.setApplicationFeeAmount(comisionTotalCentimos)
                         .setTransferData(
@@ -119,6 +142,75 @@ public class PagoControlador {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    // --- NUEVO: WEBHOOK EXTREMADAMENTE SEGURO ---
+    @PostMapping("/webhook")
+    public ResponseEntity<String> stripeWebhook(
+            @RequestBody String payload,
+            @RequestHeader("Stripe-Signature") String sigHeader) {
+
+        Event event;
+        try {
+            // Verifica que el evento viene realmente de Stripe y no de un hacker
+            event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
+        } catch (Exception e) {
+            System.err.println("Error verificando webhook: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
+        // Manejar el evento
+        if ("payment_intent.succeeded".equals(event.getType()) || "payment_intent.amount_capturable_updated".equals(event.getType())) {
+            
+            EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
+            StripeObject stripeObject = dataObjectDeserializer.getObject().orElse(null);
+            
+            if (stripeObject instanceof PaymentIntent) {
+                PaymentIntent paymentIntent = (PaymentIntent) stripeObject;
+                System.out.println("Pago Retenido con éxito: " + paymentIntent.getId());
+
+                // 1. Extraemos el ID del intercambio de la Metadata que pusimos antes
+                String intercambioIdStr = paymentIntent.getMetadata().get("intercambio_id");
+
+                if (intercambioIdStr != null) {
+                    try {
+                        Long idIntercambio = Long.parseLong(intercambioIdStr);
+                        
+                        // 2. Buscamos en la DB y actualizamos a "Reservado" de forma 100% segura
+                        Optional<Intercambio> optIntercambio = intercambioRepositorio.findById(idIntercambio);
+                        if (optIntercambio.isPresent()) {
+                            Intercambio intercambio = optIntercambio.get();
+                            
+                            // Solo si estaba Esperando, así evitamos dobleces de actualización
+                            if ("Esperando".equals(intercambio.getEstadoIntercambio())) {
+                                String pinGenerado = String.format("%04d", new java.util.Random().nextInt(10000));
+                                intercambio.setCodigoVerificacion(pinGenerado);
+                                intercambio.setPaymentIntentId(paymentIntent.getId());
+                                intercambio.setEstadoIntercambio("Reservado");
+                                intercambioRepositorio.save(intercambio);
+                                System.out.println("Intercambio " + idIntercambio + " marcado como Reservado vía Webhook.");
+
+                                // --- NUEVO: ENVIAR NOTIFICACIÓN PUSH AL VENDEDOR ---
+                                String vendedorEmail = paymentIntent.getMetadata().get("vendedor_email");
+                                if (vendedorEmail != null) {
+                                    Optional<Usuario> vendedorOpt = usuarioRepositorio.findByCorreo(vendedorEmail);
+                                    if (vendedorOpt.isPresent() && vendedorOpt.get().getFcmToken() != null) {
+                                        String title = "¡Plaza Reservada! \uD83D\uDCB8";
+                                        String bodyMessage = "Alguien ha pagado por tu plaza. Comprueba los detalles en la app.";
+                                        notificationService.sendPushNotification(vendedorOpt.get().getFcmToken(), title, bodyMessage);
+                                        System.out.println("Push notification enviada al vendedor " + vendedorEmail);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Webhook: ID de intercambio malformado.");
+                    }
+                }
+            }
+        }
+        
+        return ResponseEntity.ok("Received");
     }
 
     @PostMapping("/crear-cuenta-vendedor/{idUsuario}")
@@ -147,7 +239,6 @@ public class PagoControlador {
                 usuarioRepositorio.save(usuario);
             }
 
-            // Enlace para el Onboarding (Webview en Android)
             AccountLinkCreateParams linkParams = AccountLinkCreateParams.builder()
                     .setAccount(accountId)
                     .setRefreshUrl("https://tudominio.com/reintentar")
@@ -167,7 +258,6 @@ public class PagoControlador {
         }
     }
 
-    // Método para capturar el dinero cuando el PIN sea correcto
     @PostMapping("/capturar-pago/{paymentIntentId}")
     public ResponseEntity<?> capturarPago(@PathVariable String paymentIntentId) {
         try {

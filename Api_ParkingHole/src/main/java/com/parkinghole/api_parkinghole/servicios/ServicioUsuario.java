@@ -75,6 +75,10 @@ public class ServicioUsuario {
         return usuarioRepositorio.findByGoogleId(googleId);
     }
 
+    public Optional<Usuario> findByCorreo(String correo) {
+        return usuarioRepositorio.findByCorreo(correo);
+    }
+
     public Usuario save(Usuario usuario) {
         return usuarioRepositorio.save(usuario);
     }
