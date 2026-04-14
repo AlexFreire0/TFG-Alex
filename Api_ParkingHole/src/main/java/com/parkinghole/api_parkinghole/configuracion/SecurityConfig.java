@@ -26,7 +26,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/usuarios/google-login").permitAll()
                 .requestMatchers("/api/usuarios/registro").permitAll()
                 .requestMatchers("/api/pagos/webhook").permitAll()
-                .requestMatchers("/api/test-notificacion").permitAll()
                 // Cualquier otra petición (Coches, Intercambios, Pagos, Ver todos los usuarios) REQUIERE token
                 .anyRequest().authenticated()
             )

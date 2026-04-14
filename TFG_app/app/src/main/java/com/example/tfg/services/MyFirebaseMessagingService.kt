@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.tfg.R
 import com.example.tfg.activities.InicioActivity
+import com.example.tfg.activities.MainActivity
 import com.example.tfg.network.RetrofitClient
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -40,13 +41,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val title = remoteMessage.notification?.title ?: "Nueva Notificación"
         val body = remoteMessage.notification?.body ?: ""
+        val idIntercambio = remoteMessage.data["id_intercambio"]
 
-        mostrarNotificacion(title, body)
+        mostrarNotificacion(title, body, idIntercambio)
     }
 
-    private fun mostrarNotificacion(title: String, message: String) {
-        val intent = Intent(this, InicioActivity::class.java).apply {
+    private fun mostrarNotificacion(title: String, message: String, idIntercambio: String?) {
+        val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (idIntercambio != null) {
+                putExtra("id_intercambio", idIntercambio)
+            }
         }
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
@@ -55,8 +60,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val channelId = "fcm_default_channel"
         val builder = NotificationCompat.Builder(this, channelId)
-            // Usa el launcher por ahora, si tienes ic_notification de UI ponlo aquí
-            .setSmallIcon(R.mipmap.ic_launcher) 
+            .setSmallIcon(R.drawable.ic_notification_silhouette) 
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)

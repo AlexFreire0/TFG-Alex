@@ -35,4 +35,9 @@
     <color name="textColorPrimary">#121212</color>
     <color name="textColorSecondary">#5F6368</color>
     <color name="iconTint">#5F6368</color>
+
+    <!-- Detalle Reserva Colors -->
+    <color name="background_detalle">#F5F5F5</color>
+    <color name="card_surface_detalle">#FFFFFF</color>
+    <color name="texto_primario_detalle">#333333</color>
 </resources>

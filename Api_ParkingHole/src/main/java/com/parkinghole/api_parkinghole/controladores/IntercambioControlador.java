@@ -24,6 +24,13 @@ public class IntercambioControlador {
         return repository.findByEstadoIntercambio("Esperando");
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Intercambio> obtenerIntercambioPorId(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/ofrecer")
     public ResponseEntity<?> ofrecerPlaza(@RequestBody Intercambio nuevoIntercambio) {
         try {

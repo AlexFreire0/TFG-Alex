@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        handleDeepLink(intent)
+
         lifecycleScope.launch {
             delay(TIEMPO_CARGA)
             
@@ -30,16 +32,33 @@ class MainActivity : AppCompatActivity() {
             
             if (isTokenValid(token)) {
                 // Token válido: Redirigimos al menú principal con los datos cacheados
-                val intent = Intent(this@MainActivity, InicioActivity::class.java)
+                val intentMenu = Intent(this@MainActivity, InicioActivity::class.java)
                 val usuarioLogueado = SessionManager.getUsuarioLogueado(this@MainActivity)
-                intent.putExtra("USER_DATA", usuarioLogueado)
-                startActivity(intent)
+                intentMenu.putExtra("USER_DATA", usuarioLogueado)
+                
+                // Propagar cualquier posible extra (ej: Deep Links desde FCM)
+                intent.extras?.let { intentMenu.putExtras(it) }
+
+                startActivity(intentMenu)
             } else {
                 // Token expirado o inexistente: Limpiamos por si acaso y redirigimos al Login
                 SessionManager.cerrarSesion(this@MainActivity)
                 startActivity(Intent(this@MainActivity, LoginActivity::class.java))
             }
             finish()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent) // Actualizamos el intent base
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(currentIntent: Intent?) {
+        val idIntercambioStr = currentIntent?.getStringExtra("id_intercambio")
+        if (idIntercambioStr != null) {
+            android.util.Log.d("DEEPLINK", "Abriendo intercambio con ID: $idIntercambioStr")
         }
     }
 

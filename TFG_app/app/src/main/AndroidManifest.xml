@@ -7,6 +7,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <meta-data
+        android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@drawable/ic_notification_silhouette" />
+    <meta-data
+        android:name="com.google.firebase.messaging.default_notification_color"
+        android:resource="@color/colorPrimary" />
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -59,6 +66,11 @@
         <activity
             android:name=".activities.MainActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".activities.DetalleReservaActivity"
+            android:exported="false"
+            android:label="Detalles de la Reserva" />
 
         <activity android:name=".activities.OfrecerPlazaActivity"
             android:windowSoftInputMode="adjustPan"/>

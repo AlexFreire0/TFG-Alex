@@ -30,6 +30,9 @@ interface ApiService {
     @GET("api/intercambios/disponibles")
     fun obtenerIntercambiosDisponibles(): Call<List<Intercambio>>
 
+    @GET("api/intercambios/{id}")
+    fun getIntercambioById(@Path("id") id: Long): Call<Intercambio>
+
     @POST("api/intercambios/ofrecer")
     fun ofrecerPlaza(@Body intercambio: Intercambio): Call<Intercambio>
 

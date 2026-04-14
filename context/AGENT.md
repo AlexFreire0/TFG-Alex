@@ -62,3 +62,35 @@ This file is the single source of truth for an AI Agent operating within the Par
 - **Stripe Webhook and Real-time Notifications:**
   - *Issue:* How to notify a seller reliably when a payment is processed externally by Stripe.
   - *Solution:* When creating the `PaymentIntent` via `PaymentIntentCreateParams`, inject the seller's email into `.putMetadata("vendedor_email", ...)`. Then, intercept the `payment_intent.succeeded` event in the Webhook, extract `paymentIntent.getMetadata().get("vendedor_email")`, map it to the database `Usuario`, and finally trigger `notificationService.sendPushNotification(...)` with their `fcmToken`. This guarantees pushes are only sent if Stripe validates the funds.
+- **Producción de Notificaciones (FCM) y Seguridad:**
+  - *Issue:* Limpieza de endpoints de pruebas y estructuración de notificaciones UI.
+  - *Solution:* Los endpoints de prueba nunca se exponen sin filtro JWT en `SecurityConfig`. En Spring Boot, `NotificationService` usa SLF4J en lugar de `System.out` y los envíos combinan `.setNotification()` más `.putData("title", title).putData("body", body)` en el mismo `Message` para asegurar procesamiento de payload en activo y pasivo.
+  - *Rule for future development:* En Android, el `smallIcon` del notification builder debe ser obligatoriamente una silueta monocroma (blanco/transparente). Navegación por `PendingIntent` siempre requiere `.FLAG_IMMUTABLE`.
+- **Apariencia Gráfica de Pasarelas (Stripe PaymentSheet):**
+  - *Issue:* Mantener consistencia visual de marca (ParkingHole) en pantallas de terceros sin romper accesibilidad.
+  - *Solution:* Instanciar `PaymentSheet.Appearance` con `PaymentSheet.Colors` (leyendo `#1976D2` primary local), `Shapes` (`cornerRadiusDp=12f`) y `Typography` para la fuente custom en res. El `Appearance` se inyecta en el objeto `PaymentSheet.Configuration` y afecta al modal emergente sin CSS.
+- **Deep Linking desde FCM (Android):**
+  - *Issue:* Redirigir al usuario al pulsar una notificación push, preservando el ID cuando usamos una SplashScreen Activity intermedia.
+  - *Solution:* Extraer payloads de `remoteMessage.data` en el `FirebaseMessagingService` e inyectarlos como Extras en el `PendingIntent`. En la `MainActivity` (Splash), interceptarlos en `onCreate` y `onNewIntent`. Crucialmente, re-inyectarlos (`intent.extras?.let { intentDestino.putExtras(it) }`) al Intent que dispara la Activity real (e.g. `InicioActivity`) para evitar que se pierdan en la transición limpia del `finish()`.
+- **Aperturas de UI y Cierre de Intercambio (Reservas):**
+  - *Issue:* Crear un destino final dinámico sincronizado tras seguir un Deep Link de FCM.
+  - *Solution:* Construir `DetalleReservaActivity.kt` interceptando el extra `"id_intercambio"`. Utiliza Retrofit (`lifecycleScope.launch(Dispatchers.IO)`) llamando a un endpoint `@GET("api/intercambios/{id}")` para pintar el estado real de BBDD en lugar de fiarse de cachés perdidos.
+  - *Rule for future development:* Para transicionar el `Intercambio` a `Completado`, se requiere que el usuario (vendedor/comprador) confirme con el `PIN` de seguridad en UI. Ese PIN se empaqueta en el click listener enviando POST a `/completar/{id}`, lo que libera el PaymentIntent retenido en el backend.
+- **Android Resource Linking Failed (XML):**
+  - *Issue:* Usar `?attr/colorBackground` o `?attr/textColorSecondary` provoca rotura total de Gradle si el Theme base no declara explícitamente este `attr`.
+  - *Rule for future development:* Utilizar siempre `#Hexadecimal` directo (o `@color/...`) al maquetar vistas modulares para proyectos TFG/críticos sin depender de diccionarios de Tema dudosos.
+- **Spring Boot Compilation & Phantom Errors:**
+  - *Issue:* "GoogleCredentials cannot be resolved" tras haber editado el `pom.xml` o arrancar `Api_ParkingHole`.
+  - *Solution:* Suele ser un falso negativo de la caché de build. Las dependencias (`firebase-admin:9.2.0`) y los imports (`GoogleCredentials`) sí residen en el código fuente. Se soluciona forzando "Reload Project" de Maven en la raíz y purgado de Invalidades en el IDE.
+- **Wizard UI Pattern in Android:**
+  - *Issue:* Formularios largos y selección de mapa en la misma pantalla aturden y provocan altas tasas de rebote.
+  - *Solution:* Implementar Wizard de 2 Fases bajo un único ConstraintLayout. Ocultar/Mostrar Views (`View.GONE`, `View.VISIBLE`) es mucho más rápido y estable que inyectar Múltiples Fragmentos para TFG, interceptando retrocesos con `onBackPressedDispatcher.addCallback()`. El Marker estático inyectado a la Cámara en vez del Marker dinámico mejora la UX geoespacial.
+- **RecyclerView ID Mappings (ID = 0 Bug):**
+  - *Issue:* Las listas de entidades muestran `0` como identificador cuando el Intent intenta serializar objetos complejos.
+  - *Solution:* Reasignar los nombres de ID estrictamente en el mapeo en vez de presuponer `id`, y utilizar `reserva.id.toString()` en el `Intent.putExtra()`.
+- **Parallel Dispatching in Collections (P2P Android):**
+  - *Issue:* Múltiples peticiones HTTP a endpoints separados (`compras` vs `ventas`) causaban carga asíncrona desordenada en pantallas de historial.
+  - *Solution:* Emplear `lifecycleScope.launch(Dispatchers.Main)` e inyectar tareas de red en variables `async(Dispatchers.IO) { call.execute() }`. Finalizar iteración haciendo barrera en `.await()`, concatenar colecciones en tiempo lineal (`listA + listB`) y aplicar `sortedByDescending` antes del binding.
+- **Native Context MapViews & Memory Leaks:**
+  - *Issue:* Incrustar un `MapView` puro sin fragmento rompe el ciclo de vida de la API de Google Play Services provocando fugas de memoria y pantallazos blancos.
+  - *Solution:* Activar delegación explícita overriding manualmente en la Actividad madre: `mapView.onCreate()`, `onStart()`, `onResume()`, `onPause()`, `onStop()`, `onDestroy()`, `onSaveInstanceState()` y `onLowMemory()`.

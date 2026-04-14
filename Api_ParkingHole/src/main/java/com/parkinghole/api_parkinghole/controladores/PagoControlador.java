@@ -65,11 +65,14 @@ public class PagoControlador {
             Long idVendedor = request.getIdVendedor();
 
             // 1. Buscar entidades reales
-            Intercambio intercambio = intercambioRepositorio.findById(idIntercambio)
-                    .orElseThrow(() -> new Exception("Intercambio no encontrado"));
+            Optional<Intercambio> optIntercambio = intercambioRepositorio.findById(idIntercambio);
+            if (!optIntercambio.isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: El intercambio solicitado no existe.");
+            }
+            Intercambio intercambio = optIntercambio.get();
 
             if (!"Esperando".equals(intercambio.getEstadoIntercambio())) {
-                 return ResponseEntity.badRequest().body("Esta plaza ya no está disponible para reserva.");
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Esta plaza ya no está disponible para reserva.");
             }
 
             Usuario comprador = usuarioRepositorio.findById(idComprador)
@@ -80,6 +83,9 @@ public class PagoControlador {
             // 2. --- LÓGICA DE RENTABILIDAD SEGURA ---
             // Leemos el precio REAL de la base de datos, ¡inmune a hackeos del APK!
             Double precioVendedorReal = intercambio.getPrecioTotalComprador();
+            if (precioVendedorReal == null || precioVendedorReal <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: El precio del intercambio es cero o inválido.");
+            }
             Double comisionApp = precioVendedorReal * 0.15;
             Double precioFinalComprador = precioVendedorReal + comisionApp + 0.35;
 
@@ -113,7 +119,7 @@ public class PagoControlador {
                     .setCustomer(stripeCustomerId)
                     .setCaptureMethod(PaymentIntentCreateParams.CaptureMethod.MANUAL) // Retención
                     .setSetupFutureUsage(PaymentIntentCreateParams.SetupFutureUsage.OFF_SESSION)
-                    .putMetadata("intercambio_id", String.valueOf(idIntercambio)) // <-- VITAL PARA EL WEBHOOK
+                    .putMetadata("id_intercambio", String.valueOf(idIntercambio)) // <-- VITAL PARA EL WEBHOOK
                     .putMetadata("vendedor_email", vendedor.getCorreo()) // <-- NUEVO PARA NOTIFICACIÓN PUSH
                     .setAutomaticPaymentMethods(
                             PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
@@ -170,7 +176,7 @@ public class PagoControlador {
                 System.out.println("Pago Retenido con éxito: " + paymentIntent.getId());
 
                 // 1. Extraemos el ID del intercambio de la Metadata que pusimos antes
-                String intercambioIdStr = paymentIntent.getMetadata().get("intercambio_id");
+                String intercambioIdStr = paymentIntent.getMetadata().get("id_intercambio");
 
                 if (intercambioIdStr != null) {
                     try {

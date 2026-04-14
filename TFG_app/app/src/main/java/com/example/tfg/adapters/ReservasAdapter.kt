@@ -8,12 +8,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tfg.R
 import com.example.tfg.models.Intercambio
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ReservasAdapter(
     private var listaReservas: List<Intercambio>,
-    private val currentUserId: Long, // Pasamos tu ID para saber si vendes o compras
-    private val onItemClick: (Intercambio) -> Unit // Para cuando pulses en la reserva
+    private val currentUserId: Long,
+    private val onItemClick: (Intercambio) -> Unit
 ) : RecyclerView.Adapter<ReservasAdapter.ReservaViewHolder>() {
+
+    // Formato de fecha del backend: "2026-03-19 15:00:00"
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
     class ReservaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvTipo: TextView = view.findViewById(R.id.tvTipoReserva)
@@ -30,34 +36,68 @@ class ReservasAdapter(
     override fun onBindViewHolder(holder: ReservaViewHolder, position: Int) {
         val reserva = listaReservas[position]
 
-        // LÓGICA UBER: ¿Soy el que vende o el que compra?
+        // Determinar si está expirada: comprobación cliente-side si el backend aún no actualizó
+        val estaExpirada = esExpiradaClientSide(reserva)
+        val estadoEfectivo = if (estaExpirada) "EXPIRADA" else reserva.estadoIntercambio
+
+        // Chip de Rol (VENTA / COMPRA)
         if (reserva.idVendedor == currentUserId) {
-            holder.tvTipo.text = "OFRECIENDO"
-            holder.tvTipo.setTextColor(Color.parseColor("#FF8C00")) // Naranja para ventas
+            holder.tvTipo.text = "VENTA"
+            holder.tvTipo.setTextColor(Color.parseColor("#2E7D32")) // Verde
         } else {
-            holder.tvTipo.text = "COMPRANDO"
-            holder.tvTipo.setTextColor(Color.parseColor("#2E7D32")) // Verde para compras
+            holder.tvTipo.text = "COMPRA"
+            holder.tvTipo.setTextColor(Color.parseColor("#1976D2")) // Azul
         }
 
-        // Pintamos el resto de datos
-        holder.tvEstado.text = reserva.estadoIntercambio
-        holder.tvPrecio.text = "${"%.2f".format(reserva.precioTotalComprador)}€"
-
-        if (reserva.momentoIntercambioPrevisto.length >= 16) {
-            holder.tvHora.text = "Salida: ${reserva.momentoIntercambioPrevisto.substring(11, 16)}"
-        } else {
-            holder.tvHora.text = "Salida: --:--"
+        // Chip de Estado (con tercer estado EXPIRADA en gris)
+        when {
+            estadoEfectivo.equals("EXPIRADA", ignoreCase = true) -> {
+                holder.tvEstado.text = "Tiempo agotado"
+                holder.tvEstado.setTextColor(Color.parseColor("#9E9E9E"))
+            }
+            estadoEfectivo.equals("Completado", ignoreCase = true) ||
+            estadoEfectivo.equals("FINALIZADO", ignoreCase = true) -> {
+                holder.tvEstado.text = "Finalizado ✓"
+                holder.tvEstado.setTextColor(Color.parseColor("#2E7D32"))
+            }
+            estadoEfectivo.equals("Reservado", ignoreCase = true) -> {
+                holder.tvEstado.text = "Reservado 🔒"
+                holder.tvEstado.setTextColor(Color.parseColor("#1976D2"))
+            }
+            else -> {
+                holder.tvEstado.text = estadoEfectivo
+                holder.tvEstado.setTextColor(Color.parseColor("#FF8C00")) // Naranja para "Esperando"
+            }
         }
 
-        // Detectar el clic en la tarjeta (para ir luego al "Radar" o al "Viaje")
+        holder.tvPrecio.text = reserva.plazaDireccionTexto ?: "Ubicación sin concretar"
+        holder.tvHora.text = reserva.momentoIntercambioPrevisto.replace("T", " ")
+
         holder.itemView.setOnClickListener {
             onItemClick(reserva)
         }
     }
 
+    /**
+     * Compara la fecha del intercambio (+ minutos de cortesía) con la fecha actual del sistema.
+     * Si la hora de gracia ya pasó, es expirada aunque el backend aún no lo haya marcado.
+     */
+    private fun esExpiradaClientSide(reserva: Intercambio): Boolean {
+        // Solo marcamos como expirada si el estado aún dice "Esperando" (no confirmada)
+        if (!reserva.estadoIntercambio.equals("Esperando", ignoreCase = true)) return false
+
+        return try {
+            val fechaReserva = dateFormat.parse(reserva.momentoIntercambioPrevisto) ?: return false
+            val cortesia = (reserva.cortesiaMinutos * 60 * 1000).toLong()
+            val tiempoLimite = fechaReserva.time + cortesia
+            System.currentTimeMillis() > tiempoLimite
+        } catch (e: Exception) {
+            false // Si no podemos parsear la fecha, no la expiraremos por seguridad
+        }
+    }
+
     override fun getItemCount(): Int = listaReservas.size
 
-    // Función para refrescar la lista cuando el servidor nos responda
     fun actualizarDatos(nuevaLista: List<Intercambio>) {
         listaReservas = nuevaLista
         notifyDataSetChanged()
