@@ -21,6 +21,7 @@ data class Intercambio(
     val plazaLat: Double,
     val plazaLong: Double,
     val plazaDireccionTexto: String? = null,
+    val capacidad: String? = null,
 
     val estadoIntercambio: String = "Esperando",
     val estadoResultado: String? = null,

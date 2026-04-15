@@ -56,6 +56,9 @@ public class Intercambio {
     @Column(name = "plaza_direccion_texto")
     private String plazaDireccionTexto;
 
+    @Column(name = "capacidad")
+    private String capacidad;
+
     // --- ESTADOS ---
     @Column(name = "estado_intercambio")
     private String estadoIntercambio = "Esperando";

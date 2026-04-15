@@ -70,6 +70,7 @@ CREATE TABLE intercambio (
     plaza_lat DOUBLE PRECISION NOT NULL,
     plaza_long DOUBLE PRECISION NOT NULL,
     plaza_direccion_texto VARCHAR(255),
+    capacidad VARCHAR(255),
 
     estado_intercambio VARCHAR(255) DEFAULT 'Esperando',
     estado_resultado VARCHAR(255),

@@ -51,6 +51,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth") // Necesario para gestionar la sesión
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
 
     // --- FIREBASE CLOUD MESSAGING ---
     implementation("com.google.firebase:firebase-messaging")
@@ -60,15 +61,15 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // --- BÁSICOS PARA UI Y XML ---
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // Librerías de sistema (Kotlin y Ciclo de vida)
-    implementation(libs.activity)
+    implementation("androidx.activity:activity-ktx:1.9.3")
     implementation(libs.kotlin.stdlib)
     implementation(libs.lifecycle.runtime.ktx)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
     // --- RETROFIT & GSON (Comunicación con Spring Boot) ---
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

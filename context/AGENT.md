@@ -94,3 +94,9 @@ This file is the single source of truth for an AI Agent operating within the Par
 - **Native Context MapViews & Memory Leaks:**
   - *Issue:* Incrustar un `MapView` puro sin fragmento rompe el ciclo de vida de la API de Google Play Services provocando fugas de memoria y pantallazos blancos.
   - *Solution:* Activar delegación explícita overriding manualmente en la Actividad madre: `mapView.onCreate()`, `onStart()`, `onResume()`, `onPause()`, `onStop()`, `onDestroy()`, `onSaveInstanceState()` y `onLowMemory()`.
+- **Producción y Despliegue (Google Cloud Run):**
+  - *Issue:* Migración del servidor de pruebas local a producción.
+  - *Solution:* `RetrofitClient` debe apuntar siempre a la URL proporcionada por Cloud Run (`https://tfg-alex-732367725602.europe-west1.run.app/`) asegurando que termine con `/`. Cualquier testing futuro debe validarse contra este endpoint.
+- **Stripe Payment Sheet UI Focus Bugs:**
+  - *Issue:* Al llamar a `paymentSheet.present()`, los campos de texto no reaccionan al clic y no activan la aparición del teclado virtual.
+  - *Solution:* Añadir `android:windowSoftInputMode="adjustResize"` a la etiqueta de la `<activity>` correspondiente en el `AndroidManifest.xml` (por ejemplo, `MapsActivity`), permitiendo así que el WebView del PaymentSheet redimensione la ventana y asigne el foco correctamente. Requiere asimismo dependencias actualizadas en `activity-ktx` y `fragment-ktx`.

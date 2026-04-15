@@ -55,7 +55,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         // Recuperamos el usuario
-        usuarioLogueado = intent.getParcelableExtra("USER_DATA")
+        usuarioLogueado = com.example.tfg.utils.SessionManager.getUsuarioLogueado(this)
 
         // --- INICIALIZAR STRIPE ---
         // ¡Sustituye esto por tu clave pk_test_...!
@@ -74,7 +74,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isZoomControlsEnabled = true
 
         mMap.setOnMarkerClickListener { marker ->
+            android.util.Log.d("MapsActivity", "Clic detectado en el marcador")
             val intercambio = marker.tag as? Intercambio
+            android.util.Log.d("MapsActivity", "Valor del tag intercambio = $intercambio")
             if (intercambio != null) {
                 mostrarDialogoReserva(intercambio)
             }
@@ -87,6 +89,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun mostrarDialogoReserva(plaza: Intercambio) {
+        android.util.Log.d("MapsActivity", "Iniciando mostrarDialogoReserva. usuarioLogueado = $usuarioLogueado")
         val dialog = BottomSheetDialog(this)
         val vista = layoutInflater.inflate(R.layout.layout_confirmar_reserva, null)
         dialog.setContentView(vista)
@@ -107,7 +110,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         dropdownCoches.setText("Cargando vehículos...", false)
 
         var idCocheSeleccionado: Long? = null
-        val userId = usuarioLogueado?.uid ?: return
+        val userId = usuarioLogueado?.uid
+        android.util.Log.d("MapsActivity", "El usuario detectado es válido: ID = $userId")
+        if (userId == null) {
+            Toast.makeText(this, "Error: Sesión no válida", Toast.LENGTH_LONG).show()
+            return
+        }
 
         RetrofitClient.getApiService().obtenerMisCoches(userId).enqueue(object : Callback<List<Coche>> {
             override fun onResponse(call: Call<List<Coche>>, response: Response<List<Coche>>) {
@@ -262,7 +270,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun cargarIntercambiosEnMapa(miUbicacion: Location?) {
-        RetrofitClient.getApiService().obtenerIntercambiosDisponibles().enqueue(object : Callback<List<Intercambio>> {
+        val idUsuarioConsulta = usuarioLogueado?.uid
+        RetrofitClient.getApiService().obtenerIntercambiosDisponibles(idUsuarioConsulta).enqueue(object : Callback<List<Intercambio>> {
             override fun onResponse(call: Call<List<Intercambio>>, response: Response<List<Intercambio>>) {
                 if (response.isSuccessful) {
                     val lista = response.body() ?: emptyList()

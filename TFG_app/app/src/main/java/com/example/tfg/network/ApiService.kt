@@ -26,9 +26,9 @@ interface ApiService {
     @retrofit2.http.PUT("api/usuarios/actualizar-fcm")
     suspend fun actualizarFcm(@Query("token") token: String): Response<Unit>
 
-    // Esta ya estaba bien configurada
+    // Esta ya estaba bien configurada (Actualizada con filtros)
     @GET("api/intercambios/disponibles")
-    fun obtenerIntercambiosDisponibles(): Call<List<Intercambio>>
+    fun obtenerIntercambiosDisponibles(@Query("idUsuarioConsulta") idUsuarioConsulta: Long?): Call<List<Intercambio>>
 
     @GET("api/intercambios/{id}")
     fun getIntercambioById(@Path("id") id: Long): Call<Intercambio>

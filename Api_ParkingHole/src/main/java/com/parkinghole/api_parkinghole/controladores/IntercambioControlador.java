@@ -20,8 +20,8 @@ public class IntercambioControlador {
     private IntercambioRepositorio repository;
 
     @GetMapping("/disponibles")
-    public List<Intercambio> obtenerDisponibles() {
-        return repository.findByEstadoIntercambio("Esperando");
+    public List<Intercambio> obtenerDisponibles(@RequestParam(required = false) Long idUsuarioConsulta) {
+        return repository.findDisponiblesFiltrados("Esperando", idUsuarioConsulta);
     }
 
     @GetMapping("/{id}")

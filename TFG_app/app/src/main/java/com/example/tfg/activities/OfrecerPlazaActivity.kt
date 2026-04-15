@@ -70,6 +70,10 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
             publicarPlaza()
         }
 
+        val opcionesCapacidad = listOf("Moto-Bici", "Coche pequeño", "Coche mediano", "Coche grande", "Furgoneta", "Vehículo muy grande")
+        val adapterCapacidad = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, opcionesCapacidad)
+        binding.spinnerCapacidad.setAdapter(adapterCapacidad)
+
         cargarCochesUsuario()
     }
 
@@ -157,7 +161,8 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         val precioText = binding.etPrecio.text.toString()
-        val capacidadText = binding.etCapacidad.text.toString() // Decorativo o para uso libre
+        val capacidadText = binding.spinnerCapacidad.text.toString()
+        val direccionText = binding.etDireccion.text.toString()
         val minutosText = binding.etMinutosCortesia.text.toString()
         val horaSalidaText = binding.etHoraSalida.text.toString()
 
@@ -186,7 +191,8 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
             cortesiaMinutos = minutosText.toIntOrNull() ?: 15,
             plazaLat = selectedLocation!!.latitude,
             plazaLong = selectedLocation!!.longitude,
-            plazaDireccionTexto = "Coordenadas fijadas", // Mock de Geocodificacion
+            plazaDireccionTexto = direccionText.takeIf { it.isNotBlank() } ?: "Coordenadas fijadas",
+            capacidad = capacidadText.takeIf { it.isNotBlank() },
             estadoIntercambio = "Esperando"
         )
 
