@@ -100,3 +100,9 @@ This file is the single source of truth for an AI Agent operating within the Par
 - **Stripe Payment Sheet UI Focus Bugs:**
   - *Issue:* Al llamar a `paymentSheet.present()`, los campos de texto no reaccionan al clic y no activan la aparición del teclado virtual.
   - *Solution:* Añadir `android:windowSoftInputMode="adjustResize"` a la etiqueta de la `<activity>` correspondiente en el `AndroidManifest.xml` (por ejemplo, `MapsActivity`), permitiendo así que el WebView del PaymentSheet redimensione la ventana y asigne el foco correctamente. Requiere asimismo dependencias actualizadas en `activity-ktx` y `fragment-ktx`.
+- **End-to-End Data Modeling vs Decorators:**
+  - *Issue:* Frontend UI inputs for "Capacity" were discarded as strings because the entity didn't natively represent them, breaking server mapping integrity.
+  - *Solution:* Formalize missing keys (`capacidad`) comprehensively tracking them through SQL schemas (`VARCHAR`), Java Spring Boot entities (`@Column`), and Kotlin data classes cleanly mapping real Dropdown outputs instead.
+- **PostgreSQL Native Timestamps vs JPQL & Auto-Cleanup:**
+  - *Issue:* Calculating expiration logic summing an `Integer` courtesy grace period `+ interval '1 minute'` commonly fails via JPQL due to dialectal boundaries and parsing strictness. Cron Jobs add structural overhead.
+  - *Solution:* Convert the Spring Data JPA `@Query` to `nativeQuery = true` executing raw Postgres operations mapping `interval` sums organically against `CURRENT_TIMESTAMP`. Additionally, run `@Modifying` update directives updating "Caducado" rows silently inside Controllers dynamically right before executing GET selects, granting autonomous sweeping traits without Cron daemons.

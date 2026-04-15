@@ -21,6 +21,7 @@ public class IntercambioControlador {
 
     @GetMapping("/disponibles")
     public List<Intercambio> obtenerDisponibles(@RequestParam(required = false) Long idUsuarioConsulta) {
+        repository.caducarPlazasPasadasDeTiempo();
         return repository.findDisponiblesFiltrados("Esperando", idUsuarioConsulta);
     }
 
