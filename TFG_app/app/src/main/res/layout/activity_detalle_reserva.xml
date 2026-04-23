@@ -231,6 +231,19 @@
             android:layout_marginVertical="16dp"
             android:text="CONFIRMAR ENTREGA"
             app:cornerRadius="12dp" />
+
+        <TextView
+            android:id="@+id/tvPinDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginVertical="16dp"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textColor="#1976D2"
+            android:visibility="gone"
+            tools:text="TU PIN: 1234"/>
     </LinearLayout>
 
     <!-- Overlay de Carga General -->

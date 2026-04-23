@@ -27,6 +27,7 @@ data class Intercambio(
     val estadoIntercambio: String = "Esperando",
     val estadoResultado: String? = null,
 
+    @SerializedName("codigoVerificacion")
     val codigoVerificacion: String? = null,
 
     @SerializedName("calificacionAlVendedor")

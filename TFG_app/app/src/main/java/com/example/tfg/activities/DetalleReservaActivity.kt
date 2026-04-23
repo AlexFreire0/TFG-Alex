@@ -135,6 +135,7 @@ class DetalleReservaActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.btnConfirmar.isEnabled = false
             binding.btnConfirmar.text = "OFERTA EXPIRADA"
             binding.tilPin.visibility = View.GONE
+            binding.tvPinDisplay.visibility = View.GONE
             binding.loadingOverlay.visibility = View.GONE
             binding.tvDireccionCentral.text = "⏱ Esta oferta ya no está activa"
             return
@@ -146,6 +147,7 @@ class DetalleReservaActivity : AppCompatActivity(), OnMapReadyCallback {
         if (estaCompletado) {
             binding.btnConfirmar.isEnabled = false
             binding.tilPin.visibility = View.GONE
+            binding.tvPinDisplay.visibility = View.GONE
             binding.btnConfirmar.text = "MANDATO DE ENTREGA CERRADO"
         }
 
@@ -159,6 +161,7 @@ class DetalleReservaActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.layoutBuyerAssigned.visibility = View.GONE
             binding.tilPin.visibility = View.GONE        // El comprador aún no llegó, no hace falta PIN
             binding.btnConfirmar.visibility = View.GONE  // No hay nada que confirmar aún
+            binding.tvPinDisplay.visibility = View.GONE
             binding.loadingOverlay.visibility = View.GONE
         } else if (estaReservado && esVendedor) {
             // ✅ FLUJO DE CIERRE: El comprador está aquí y soy el dueño de la plaza
@@ -166,7 +169,8 @@ class DetalleReservaActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.layoutBuyerAssigned.visibility = View.VISIBLE
             binding.tilPin.visibility = View.VISIBLE
             binding.btnConfirmar.visibility = View.VISIBLE
-            binding.btnConfirmar.text = "Finalizar y Cobrar 💸"
+            binding.tvPinDisplay.visibility = View.GONE
+            binding.btnConfirmar.text = "Finalizar y Cobrar \uD83D\uDCB8"
             binding.btnConfirmar.isEnabled = false  // TextWatcher lo activa a los 4 dígitos
             if (reserva.idCocheComprador != null) {
                 cargarCocheComprador(reserva.idCocheComprador)
@@ -174,11 +178,13 @@ class DetalleReservaActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.loadingOverlay.visibility = View.GONE
             }
         } else {
-            // Comprador viendo una reserva activa suya — solo info, sin PIN
+            // Comprador viendo una reserva activa suya — mostrar PIN para el vendedor
             binding.layoutWaitingBuyer.visibility = View.GONE
             binding.layoutBuyerAssigned.visibility = View.VISIBLE
             binding.tilPin.visibility = View.GONE
             binding.btnConfirmar.visibility = View.GONE
+            binding.tvPinDisplay.visibility = View.VISIBLE
+            binding.tvPinDisplay.text = "TU PIN DE ENTREGA: " + (reserva.codigoVerificacion ?: "---")
             if (reserva.idCocheComprador != null) {
                 cargarCocheComprador(reserva.idCocheComprador)
             } else {

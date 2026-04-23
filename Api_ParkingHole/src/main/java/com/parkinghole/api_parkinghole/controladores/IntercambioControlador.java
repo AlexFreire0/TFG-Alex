@@ -150,18 +150,24 @@ public class IntercambioControlador {
             @PathVariable Long id,
             @RequestParam String pinIngresado) {
         return repository.findById(id).map(intercambio -> {
-            // 1. Validar PIN
-            if (intercambio.getCodigoVerificacion() == null ||
-                    !intercambio.getCodigoVerificacion().equals(pinIngresado)) {
+            logger.info("Verificando PIN para intercambio {}. PaymentIntentId en DB: {}, PIN Esperado: {}, PIN Recibido: {}", 
+                        id, intercambio.getPaymentIntentId(), intercambio.getCodigoVerificacion(), pinIngresado);
+
+            // 1. Validar PIN (invertir la comprobación para evitar NPE si getCodigoVerificacion() es null)
+            if (pinIngresado == null || !pinIngresado.equals(intercambio.getCodigoVerificacion())) {
+                logger.warn("Validación fallida: PIN incorrecto o nulo para intercambio {}", id);
                 return ResponseEntity.badRequest().body("PIN incorrecto.");
             }
 
             // 2. --- CAPTURAR EL PAGO EN STRIPE ---
             try {
-                if (intercambio.getPaymentIntentId() != null) {
-                    // Recuperamos el pago de Stripe y lo capturamos (liberamos el dinero)
+                if (intercambio.getPaymentIntentId() != null && !intercambio.getPaymentIntentId().isEmpty()) {
+                    logger.info("Iniciando capture en Stripe para paymentIntentId: {}", intercambio.getPaymentIntentId());
                     PaymentIntent intent = PaymentIntent.retrieve(intercambio.getPaymentIntentId());
                     intent.capture();
+                    logger.info("Capture de Stripe exitoso para intercambio {}", id);
+                } else {
+                    logger.warn("Intercambio {} no tiene paymentIntentId. Marcando como completado sin cobro de Stripe.", id);
                 }
 
                 // 3. Si el pago se capturó bien (o no había pago), completamos
@@ -171,10 +177,9 @@ public class IntercambioControlador {
                 return ResponseEntity.ok(intercambio);
 
             } catch (Exception e) {
-                // Si falla la captura de Stripe (ej. tarjeta caducada en esos minutos),
-                // avisamos
+                logger.error("Excepción en pasarela de pago al capturar Stripe para intercambio {}", id, e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error al procesar el cobro final: " + e.getMessage());
+                        .body("Error en pasarela de pago: No se pudo verificar el cobro con el banco.");
             }
 
         }).orElse(ResponseEntity.notFound().build());
