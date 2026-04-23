@@ -94,4 +94,10 @@ interface ApiService {
         @Field("idCocheComprador") idCocheComprador: Long,
         @Field("paymentIntentId") paymentIntentId: String // El ID que nos dio Stripe
     ): Response<Intercambio>
+
+    @retrofit2.http.PATCH("api/intercambios/{id}/calificar")
+    suspend fun calificarIntercambio(
+        @Path("id") id: Long,
+        @Body request: CalificacionRequest
+    ): Response<Intercambio>
 }

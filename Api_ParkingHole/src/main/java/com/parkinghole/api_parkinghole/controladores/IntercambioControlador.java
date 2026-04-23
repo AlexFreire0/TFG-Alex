@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.security.Principal;
+import com.parkinghole.api_parkinghole.modelos.Usuario;
+import com.parkinghole.api_parkinghole.repositorio.UsuarioRepositorio;
 
 @RestController
 @RequestMapping("/api/intercambios")
@@ -18,6 +22,25 @@ public class IntercambioControlador {
 
     @Autowired
     private IntercambioRepositorio repository;
+
+    @Autowired
+    private UsuarioRepositorio usuarioRepository;
+
+    private Usuario getUsuarioAutenticado(Principal principal) throws Exception {
+        if (principal == null || principal.getName() == null) {
+            throw new Exception("No autorizado");
+        }
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(principal.getName());
+        if (usuarioOpt.isEmpty()) {
+            throw new Exception("Usuario no encontrado en base de datos");
+        }
+        return usuarioOpt.get();
+    }
+
+    public static class CalificacionRequest {
+        public Integer estrellas;
+        public String observaciones;
+    }
 
     @GetMapping("/disponibles")
     public List<Intercambio> obtenerDisponibles(@RequestParam(required = false) Long idUsuarioConsulta) {
@@ -121,5 +144,36 @@ public class IntercambioControlador {
             }
 
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/calificar")
+    public ResponseEntity<?> calificarIntercambio(
+            @PathVariable Long id,
+            @RequestBody CalificacionRequest request,
+            Principal principal) {
+        try {
+            Usuario usuarioSeguro = getUsuarioAutenticado(principal);
+            Long uid = usuarioSeguro.getUid();
+
+            return repository.findById(id).map(intercambio -> {
+                if (uid.equals(intercambio.getIdVendedor())) {
+                    intercambio.setCalificacionAlComprador(request.estrellas);
+                    intercambio.setObservacionesDelVendedor(request.observaciones);
+                } else if (uid.equals(intercambio.getIdComprador())) {
+                    intercambio.setCalificacionAlVendedor(request.estrellas);
+                    intercambio.setObservacionesDelComprador(request.observaciones);
+                } else {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("No tienes permisos para calificar este intercambio.");
+                }
+
+                repository.save(intercambio);
+                return ResponseEntity.ok(intercambio);
+            }).orElse(ResponseEntity.notFound().build());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Error de autenticación: " + e.getMessage());
+        }
     }
 }

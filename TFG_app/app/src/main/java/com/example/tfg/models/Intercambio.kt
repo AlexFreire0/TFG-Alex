@@ -26,5 +26,17 @@ data class Intercambio(
     val estadoIntercambio: String = "Esperando",
     val estadoResultado: String? = null,
 
-    val codigoVerificacion: String? = null
+    val codigoVerificacion: String? = null,
+
+    @SerializedName("calificacionAlVendedor")
+    val calificacionAlVendedor: Int? = null,
+
+    @SerializedName("calificacionAlComprador")
+    val calificacionAlComprador: Int? = null,
+
+    @SerializedName("observacionesDelComprador")
+    val observacionesDelComprador: String? = null,
+
+    @SerializedName("observacionesDelVendedor")
+    val observacionesDelVendedor: String? = null
 ) : Parcelable

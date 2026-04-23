@@ -185,6 +185,28 @@ class DetalleReservaActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.loadingOverlay.visibility = View.GONE
             }
         }
+
+        // --- SISTEMA DE CALIFICACIONES ---
+        val estaCancelado = reserva.estadoIntercambio?.equals("Cancelado", ignoreCase = true) == true
+        if (estaCompletado || estaExpirada || estaCancelado) {
+            val esComprador = reserva.idComprador == currentUserId
+            
+            var necesitaCalificar = false
+            if (esVendedor && reserva.calificacionAlComprador == null && reserva.idComprador != null) {
+                necesitaCalificar = true
+            } else if (esComprador && reserva.calificacionAlVendedor == null) {
+                necesitaCalificar = true
+            }
+
+            if (necesitaCalificar) {
+                val reviewDialog = com.example.tfg.dialogs.ReviewDialogFragment.newInstance(
+                    reserva.id ?: -1L,
+                    reserva.estadoIntercambio ?: "Finalizado"
+                )
+                reviewDialog.onReviewSubmitted = { cargarDatos() }
+                reviewDialog.show(supportFragmentManager, "ReviewDialog")
+            }
+        }
     }
 
     /**
