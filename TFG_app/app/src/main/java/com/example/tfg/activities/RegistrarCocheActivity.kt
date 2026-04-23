@@ -28,6 +28,10 @@ class RegistrarCocheActivity : AppCompatActivity() {
 
         usuarioActual = intent.getParcelableExtra("USER_DATA")
 
+        val capacidades = arrayOf("Moto-Bici", "Coche pequeño", "Coche mediano", "Coche grande", "Furgoneta", "Vehículo muy grande")
+        val adapterCapacidad = ArrayAdapter(this, android.R.layout.simple_list_item_1, capacidades)
+        binding.spinnerCapacidad.setAdapter(adapterCapacidad)
+
         cargarMarcasDesdeAPI()
 
         // Listener para cargar modelos al seleccionar una marca
@@ -79,13 +83,14 @@ class RegistrarCocheActivity : AppCompatActivity() {
         val marca = binding.spinnerMarca.text.toString().trim()
         val modelo = binding.spinnerModelo.text.toString().trim()
         val matriculaInput = binding.etMatricula.text.toString().trim().uppercase()
+        val capacidad = binding.spinnerCapacidad.text.toString().trim()
 
         // 1. Limpiamos espacios/guiones y definimos el Regex de validación
         val matriculaLimpia = matriculaInput.replace(" ", "").replace("-", "")
         val matriculaRegex = "^([0-9]{4}[BCDFGHJKLMNPQRSTVWXYZ]{3}|[A-Z]{1,2}[0-9]{4,6}[A-Z]{0,2})$".toRegex()
 
         // 2. Validaciones de campos vacíos y formato de matrícula
-        if (marca.isEmpty() || modelo.isEmpty() || matriculaLimpia.isEmpty()) {
+        if (marca.isEmpty() || modelo.isEmpty() || matriculaLimpia.isEmpty() || capacidad.isEmpty()) {
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
             return
         }
@@ -114,7 +119,8 @@ class RegistrarCocheActivity : AppCompatActivity() {
             modelo = modelo,
             matricula = matriculaLimpia,
             color = "No especificado",
-            activo = true
+            activo = true,
+            capacidad = capacidad
         )
 
         RetrofitClient.getApiService().registrarCoche(nuevoCoche).enqueue(object : Callback<Coche> {

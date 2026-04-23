@@ -28,5 +28,8 @@ data class Coche(
     val imagenUrl: String? = null,
 
     @SerializedName("activo")
-    val activo: Boolean? = true
+    val activo: Boolean? = true,
+
+    @SerializedName("capacidad")
+    val capacidad: String? = null
 ) : Parcelable

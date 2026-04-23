@@ -27,6 +27,5 @@ public class Coche {
     private String imagenUrl;
     private boolean activo = true;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
-    private java.time.LocalDateTime updatedAt;
+    private String capacidad;
 }
