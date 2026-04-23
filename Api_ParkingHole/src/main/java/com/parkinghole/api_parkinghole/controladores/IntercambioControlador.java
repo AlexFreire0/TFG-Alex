@@ -122,11 +122,12 @@ public class IntercambioControlador {
 
     private void cancelarPagoStripe(String paymentIntentId) {
         try {
-            logger.info("Solicitando cancelación de retención a Stripe para PaymentIntent: {}", paymentIntentId);
-            PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+            String cleanId = paymentIntentId.contains("_secret_") ? paymentIntentId.split("_secret_")[0] : paymentIntentId;
+            logger.info("Solicitando cancelación de retención a Stripe para PaymentIntent: {}", cleanId);
+            PaymentIntent intent = PaymentIntent.retrieve(cleanId);
             if (!"canceled".equals(intent.getStatus())) {
                 intent.cancel();
-                logger.info("Pago {} cancelado en Stripe exitosamente.", paymentIntentId);
+                logger.info("Pago {} cancelado en Stripe exitosamente.", cleanId);
             }
         } catch (Exception ex) {
             logger.error("ERROR CRÍTICO AL CANCELAR STRIPE (Posible fuga de retención): {}", ex.getMessage(), ex);
@@ -162,8 +163,11 @@ public class IntercambioControlador {
             // 2. --- CAPTURAR EL PAGO EN STRIPE ---
             try {
                 if (intercambio.getPaymentIntentId() != null && !intercambio.getPaymentIntentId().isEmpty()) {
-                    logger.info("Iniciando capture en Stripe para paymentIntentId: {}", intercambio.getPaymentIntentId());
-                    PaymentIntent intent = PaymentIntent.retrieve(intercambio.getPaymentIntentId());
+                    String rawId = intercambio.getPaymentIntentId();
+                    String cleanId = rawId.contains("_secret_") ? rawId.split("_secret_")[0] : rawId;
+                    
+                    logger.info("Iniciando capture en Stripe para paymentIntentId limpio: {}", cleanId);
+                    PaymentIntent intent = PaymentIntent.retrieve(cleanId);
                     intent.capture();
                     logger.info("Capture de Stripe exitoso para intercambio {}", id);
                 } else {
