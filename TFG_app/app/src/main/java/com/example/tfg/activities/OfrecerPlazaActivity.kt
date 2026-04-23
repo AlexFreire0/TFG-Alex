@@ -2,6 +2,8 @@ package com.example.tfg.activities
 
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -73,6 +75,23 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
         val opcionesCapacidad = listOf("Moto-Bici", "Coche pequeño", "Coche mediano", "Coche grande", "Furgoneta", "Vehículo muy grande")
         val adapterCapacidad = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, opcionesCapacidad)
         binding.spinnerCapacidad.setAdapter(adapterCapacidad)
+
+        binding.etPrecio.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val gananciaText = s.toString()
+                val ganancia = gananciaText.toDoubleOrNull()
+                if (ganancia != null && ganancia > 0) {
+                    val comision = (ganancia * 0.15) + 0.35
+                    val total = ganancia + comision
+                    binding.tvResumenGanancia.visibility = View.VISIBLE
+                    binding.tvResumenGanancia.text = String.format("Tú recibirás íntegros %.2f€. El comprador pagará %.2f€ (incl. gestión).", ganancia, total)
+                } else {
+                    binding.tvResumenGanancia.visibility = View.GONE
+                }
+            }
+        })
 
         cargarCochesUsuario()
     }

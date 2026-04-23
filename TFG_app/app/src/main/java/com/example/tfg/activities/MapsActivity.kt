@@ -102,7 +102,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
         bottomSheet?.setBackgroundResource(android.R.color.transparent)
 
-        vista.findViewById<TextView>(R.id.tvReservaPrecio).text = "${"%.2f".format(plaza.precioTotalComprador)}€"
+        vista.findViewById<TextView>(R.id.tvDesglosePlaza).text = String.format("Reserva de plaza: %.2f€", plaza.gananciaVendedor ?: 0.0)
+        vista.findViewById<TextView>(R.id.tvDesgloseGestion).text = String.format("Gastos de gestión: %.2f€", plaza.comisionServicio ?: 0.0)
+        vista.findViewById<TextView>(R.id.tvReservaPrecio).text = String.format("Total a pagar: %.2f€", plaza.precioTotalComprador)
 
         if (plaza.momentoIntercambioPrevisto.length >= 16) {
             vista.findViewById<TextView>(R.id.tvReservaHora).text = "Salida prevista: ${plaza.momentoIntercambioPrevisto.substring(11, 16)}"

@@ -63,6 +63,22 @@ public class IntercambioControlador {
     @PostMapping("/ofrecer")
     public ResponseEntity<?> ofrecerPlaza(@RequestBody Intercambio nuevoIntercambio) {
         try {
+            // --- LÓGICA DE TRANSPARENCIA DE COMISIONES ---
+            Double ganancia = nuevoIntercambio.getGananciaVendedor();
+            if (ganancia == null || ganancia < 0) ganancia = 0.0;
+            
+            Double comision = (ganancia * 0.15) + 0.35;
+            Double precioTotal = ganancia + comision;
+
+            // Redondeo a 2 decimales para evitar problemas de coma flotante
+            comision = Math.round(comision * 100.0) / 100.0;
+            precioTotal = Math.round(precioTotal * 100.0) / 100.0;
+
+            nuevoIntercambio.setGananciaVendedor(ganancia);
+            nuevoIntercambio.setComisionServicio(comision);
+            nuevoIntercambio.setPrecioTotalComprador(precioTotal);
+            // ---------------------------------------------
+
             nuevoIntercambio.setEstadoIntercambio("Esperando");
             if (nuevoIntercambio.getCreatedAt() == null) {
                 nuevoIntercambio.setCreatedAt(LocalDateTime.now());

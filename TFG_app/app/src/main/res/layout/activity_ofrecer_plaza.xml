@@ -116,6 +116,17 @@
                     android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:id="@+id/tvResumenGanancia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#4CAF50"
+                android:textSize="13sp"
+                android:textStyle="italic"
+                android:visibility="gone"
+                tools:text="Tú recibirás íntegros los 3.00€. El precio final será 3.80€." />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

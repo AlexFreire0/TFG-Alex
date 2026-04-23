@@ -81,16 +81,17 @@ public class PagoControlador {
                     .orElseThrow(() -> new Exception("Vendedor no encontrado"));
 
             // 2. --- LÓGICA DE RENTABILIDAD SEGURA ---
-            // Leemos el precio REAL de la base de datos, ¡inmune a hackeos del APK!
-            Double precioVendedorReal = intercambio.getPrecioTotalComprador();
-            if (precioVendedorReal == null || precioVendedorReal <= 0) {
+            // Leemos los precios EXACTOS de la base de datos
+            Double precioTotal = intercambio.getPrecioTotalComprador();
+            Double comisionTotal = intercambio.getComisionServicio();
+
+            if (precioTotal == null || precioTotal <= 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: El precio del intercambio es cero o inválido.");
             }
-            Double comisionApp = precioVendedorReal * 0.15;
-            Double precioFinalComprador = precioVendedorReal + comisionApp + 0.35;
 
-            Long montoTotalCentimos = Math.round(precioFinalComprador * 100);
-            Long comisionTotalCentimos = Math.round((comisionApp + 0.35) * 100);
+            // Stripe requiere los montos en céntimos (ej. 3.00€ -> 300)
+            Long montoTotalCentimos = Math.round(precioTotal * 100);
+            Long comisionTotalCentimos = (comisionTotal != null) ? Math.round(comisionTotal * 100) : 0L;
 
             // 3. Gestionar Customer (Comprador)
             String stripeCustomerId = comprador.getStripeCustomerId();
