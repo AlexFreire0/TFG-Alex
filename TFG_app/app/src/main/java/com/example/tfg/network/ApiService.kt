@@ -61,13 +61,6 @@ interface ApiService {
     @GET("api/intercambios/mis-reservas/{idComprador}")
     fun obtenerMisReservas(@Path("idComprador") idComprador: Long): Call<List<Intercambio>>
 
-    @POST("api/intercambios/reservar/{id}")
-    fun reservarPlaza(
-        @Path("id") intercambioId: Long,
-        @Query("idComprador") idComprador: Long,
-        @Query("idCocheComprador") idCocheComprador: Long // <- Nuevo parámetro
-    ): Call<Intercambio>
-
     @GET("api/coches/detalle/{id}")
     fun obtenerDetalleCoche(@Path("id") id: Long): Call<Coche>
 

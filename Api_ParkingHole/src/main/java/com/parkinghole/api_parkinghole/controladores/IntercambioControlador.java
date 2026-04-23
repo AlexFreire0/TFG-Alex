@@ -15,10 +15,15 @@ import java.util.Optional;
 import java.security.Principal;
 import com.parkinghole.api_parkinghole.modelos.Usuario;
 import com.parkinghole.api_parkinghole.repositorio.UsuarioRepositorio;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/intercambios")
 public class IntercambioControlador {
+
+    private static final Logger logger = LoggerFactory.getLogger(IntercambioControlador.class);
 
     @Autowired
     private IntercambioRepositorio repository;
@@ -72,6 +77,7 @@ public class IntercambioControlador {
         }
     }
 
+    @Transactional
     @PostMapping("/reservar/{id}")
     public ResponseEntity<?> reservarPlaza(
             @PathVariable Long id,
@@ -79,24 +85,52 @@ public class IntercambioControlador {
             @RequestParam Long idCocheComprador,
             @RequestParam String paymentIntentId // <--- NUEVO: Recibimos el ID del pago retenido
     ) {
-        return repository.findById(id).map(intercambio -> {
-            if (!"Esperando".equals(intercambio.getEstadoIntercambio())) {
-                return ResponseEntity.badRequest().body("Esta plaza ya no está disponible");
+        logger.info("Recibida petición de reserva. ID Plaza: {}, PaymentIntent: {}", id, paymentIntentId);
+        try {
+            return repository.findById(id).map(intercambio -> {
+                if (!"Esperando".equals(intercambio.getEstadoIntercambio())) {
+                    logger.warn("Plaza {} ya no está disponible (Estado: {}). Abortando y cancelando Stripe.", id, intercambio.getEstadoIntercambio());
+                    cancelarPagoStripe(paymentIntentId);
+                    return ResponseEntity.badRequest().body("Esta plaza ya no está disponible");
+                }
+
+                // Generamos PIN
+                String pinGenerado = String.format("%04d", new java.util.Random().nextInt(10000));
+                intercambio.setCodigoVerificacion(pinGenerado);
+
+                // Guardamos datos de reserva
+                intercambio.setIdComprador(idComprador);
+                intercambio.setIdCocheComprador(idCocheComprador);
+                intercambio.setPaymentIntentId(paymentIntentId); // <--- NUEVO: Vinculamos el pago
+                intercambio.setEstadoIntercambio("Reservado");
+
+                repository.save(intercambio);
+                logger.info("Reserva completada con éxito en BD para la plaza {}.", id);
+                return ResponseEntity.ok(intercambio);
+            }).orElseGet(() -> {
+                logger.warn("Plaza {} no encontrada en BD. Cancelando pago de Stripe.", id);
+                cancelarPagoStripe(paymentIntentId);
+                return ResponseEntity.notFound().build();
+            });
+        } catch (Exception e) {
+            logger.error("Error crítico durante la reserva de la plaza {}. Intentando cancelar pago.", id, e);
+            cancelarPagoStripe(paymentIntentId);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al guardar en base de datos. Retención cancelada automáticamente.");
+        }
+    }
+
+    private void cancelarPagoStripe(String paymentIntentId) {
+        try {
+            logger.info("Solicitando cancelación de retención a Stripe para PaymentIntent: {}", paymentIntentId);
+            PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+            if (!"canceled".equals(intent.getStatus())) {
+                intent.cancel();
+                logger.info("Pago {} cancelado en Stripe exitosamente.", paymentIntentId);
             }
-
-            // Generamos PIN
-            String pinGenerado = String.format("%04d", new java.util.Random().nextInt(10000));
-            intercambio.setCodigoVerificacion(pinGenerado);
-
-            // Guardamos datos de reserva
-            intercambio.setIdComprador(idComprador);
-            intercambio.setIdCocheComprador(idCocheComprador);
-            intercambio.setPaymentIntentId(paymentIntentId); // <--- NUEVO: Vinculamos el pago
-            intercambio.setEstadoIntercambio("Reservado");
-
-            repository.save(intercambio);
-            return ResponseEntity.ok(intercambio);
-        }).orElse(ResponseEntity.notFound().build());
+        } catch (Exception ex) {
+            logger.error("ERROR CRÍTICO AL CANCELAR STRIPE (Posible fuga de retención): {}", ex.getMessage(), ex);
+        }
     }
 
     @GetMapping("/mis-ofrecidas/{idVendedor}")

@@ -11,6 +11,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.example.tfg.R
 import com.example.tfg.databinding.ActivityMapsBinding
 import com.example.tfg.models.Coche
@@ -48,6 +52,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var pendingIntercambioId: Long? = null
     private var pendingIdCocheComprador: Long? = null
     private var pendingDialog: BottomSheetDialog? = null
+    private var pendingPaymentIntentId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,7 +147,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         btnConfirmar.setOnClickListener {
                             if (idCocheSeleccionado != null) {
                                 btnConfirmar.isEnabled = false
-                                btnConfirmar.text = "PROCESANDO PAGO..."
+                                btnConfirmar.text = "PROCESANDO PAGO, NO CIERRES..."
 
                                 // Guardamos los datos temporalmente
                                 pendingIntercambioId = plaza.id
@@ -192,6 +197,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     )
 
                     // ¡Abrimos la pasarela de pago real!
+                    pendingPaymentIntentId = pagoInfo.paymentIntent
                     paymentSheet.presentWithPaymentIntent(pagoInfo.paymentIntent, paymentSheetConfig)
 
                     // Restauramos el botón por si el usuario cancela el pago y quiere volver a darle
@@ -227,32 +233,44 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "¡Pago completado!", Toast.LENGTH_SHORT).show()
 
                 // Ahora sí, ejecutamos la reserva oficial en nuestra base de datos
-                if (pendingIntercambioId != null && pendingIdCocheComprador != null && pendingDialog != null) {
-                    ejecutarReserva(pendingIntercambioId!!, pendingIdCocheComprador!!, pendingDialog!!)
+                if (pendingIntercambioId != null && pendingIdCocheComprador != null && pendingDialog != null && pendingPaymentIntentId != null) {
+                    val dialogView = pendingDialog?.findViewById<Button>(R.id.btnConfirmarReserva)
+                    dialogView?.text = "VERIFICANDO RESERVA..."
+                    dialogView?.isEnabled = false
+                    ejecutarReserva(pendingIntercambioId!!, pendingIdCocheComprador!!, pendingPaymentIntentId!!, pendingDialog!!)
+                } else {
+                    Toast.makeText(this, "Error local: Faltan datos de la reserva", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    private fun ejecutarReserva(intercambioId: Long, idCocheComprador: Long, dialog: BottomSheetDialog) {
+    private fun ejecutarReserva(intercambioId: Long, idCocheComprador: Long, paymentIntentId: String, dialog: BottomSheetDialog) {
         val idComprador = usuarioLogueado?.uid ?: return
 
-        RetrofitClient.getApiService().reservarPlaza(intercambioId, idComprador, idCocheComprador).enqueue(object : Callback<Intercambio> {
-            override fun onResponse(call: Call<Intercambio>, response: Response<Intercambio>) {
-                if (response.isSuccessful) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitClient.getApiService().reservarPlaza(
+                    intercambioId, idComprador, idCocheComprador, paymentIntentId
+                )
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        dialog.dismiss()
+                        Toast.makeText(this@MapsActivity, "¡Plaza tuya! Revisa el Radar.", Toast.LENGTH_LONG).show()
+                        setupMapaConUbicacion()
+                    } else {
+                        Toast.makeText(this@MapsActivity, "Pago autorizado pero error en reserva. Tu dinero ha sido liberado automáticamente.", Toast.LENGTH_LONG).show()
+                        dialog.dismiss()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MapsActivity, "Error de red. Si se hizo un cargo, contacta a soporte.", Toast.LENGTH_LONG).show()
                     dialog.dismiss()
-                    Toast.makeText(this@MapsActivity, "¡Plaza tuya! Revisa el Radar.", Toast.LENGTH_LONG).show()
-                    setupMapaConUbicacion()
-                } else {
-                    val errorMsg = response.errorBody()?.string() ?: "Error al reservar"
-                    Toast.makeText(this@MapsActivity, errorMsg, Toast.LENGTH_SHORT).show()
                 }
             }
-
-            override fun onFailure(call: Call<Intercambio>, t: Throwable) {
-                Toast.makeText(this@MapsActivity, "Error de red: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+        }
     }
 
     private fun setupMapaConUbicacion() {

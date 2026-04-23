@@ -2,6 +2,7 @@ package com.example.tfg.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import com.google.gson.annotations.SerializedName
 
 @Parcelize
 data class Intercambio(
