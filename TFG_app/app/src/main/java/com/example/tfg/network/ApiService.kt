@@ -88,6 +88,9 @@ interface ApiService {
         @Field("paymentIntentId") paymentIntentId: String // El ID que nos dio Stripe
     ): Response<Intercambio>
 
+    @GET("api/usuarios/{id}/saldo")
+    fun obtenerSaldo(@Path("id") idUsuario: Long): Call<Double>
+
     @retrofit2.http.PATCH("api/intercambios/{id}/calificar")
     suspend fun calificarIntercambio(
         @Path("id") id: Long,

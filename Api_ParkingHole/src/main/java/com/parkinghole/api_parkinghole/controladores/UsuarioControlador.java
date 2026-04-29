@@ -79,4 +79,11 @@ public class UsuarioControlador {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{id}/saldo")
+    public ResponseEntity<Double> obtenerSaldo(@PathVariable Long id) {
+        return servicioUsuario.findByUid(id)
+                .map(u -> ResponseEntity.ok(u.getSaldo() != null ? u.getSaldo() : 0.0))
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

@@ -46,6 +46,9 @@ public class Usuario {
     @Column(name = "stripe_connect_id")
     private String stripeConnectId;
 
+    @Column(name = "saldo")
+    private Double saldo = 0.0;
+
     @Column(name = "metodo_pago_preferido")
     private String metodoPagoPreferido;
 

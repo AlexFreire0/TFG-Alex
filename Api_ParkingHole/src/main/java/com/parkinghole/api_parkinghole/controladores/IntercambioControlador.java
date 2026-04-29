@@ -190,6 +190,15 @@ public class IntercambioControlador {
                     logger.warn("Intercambio {} no tiene paymentIntentId. Marcando como completado sin cobro de Stripe.", id);
                 }
 
+                // Actualizar saldo del vendedor
+                usuarioRepository.findById(intercambio.getIdVendedor()).ifPresent(vendedor -> {
+                    Double saldoActual = vendedor.getSaldo() != null ? vendedor.getSaldo() : 0.0;
+                    Double ganancia = intercambio.getGananciaVendedor() != null ? intercambio.getGananciaVendedor() : 0.0;
+                    vendedor.setSaldo(saldoActual + ganancia);
+                    usuarioRepository.save(vendedor);
+                    logger.info("Saldo sumado correctamente al vendedor {}. Nuevo saldo: {}", vendedor.getUid(), vendedor.getSaldo());
+                });
+
                 // 3. Si el pago se capturó bien (o no había pago), completamos
                 intercambio.setEstadoIntercambio("Completado");
                 repository.save(intercambio);

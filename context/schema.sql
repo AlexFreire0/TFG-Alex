@@ -28,7 +28,8 @@ CREATE TABLE usuario (
     metodo_pago_preferido VARCHAR(255),
     tarjeta_brand VARCHAR(255),
     tarjeta_ultimos_cuatro VARCHAR(255),
-    stripe_connect_id VARCHAR(255)
+    stripe_connect_id VARCHAR(255),
+    saldo DECIMAL(10,2) DEFAULT 0.0
 );
 
 

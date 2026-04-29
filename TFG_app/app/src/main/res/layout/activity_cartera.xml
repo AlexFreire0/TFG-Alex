@@ -1,56 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
+    android:background="@color/white"
     android:padding="24dp">
 
-    <!-- Icon: Wallet or money -->
     <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_marginBottom="24dp"
+        android:id="@+id/ivWalletIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="32dp"
         android:src="@drawable/ic_wallet"
-        android:contentDescription="Icono de cartera" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#1976D2" />
 
-    <!-- Big Title -->
     <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mi Cartera / Cobros"
-        android:textSize="28sp"
+        android:layout_marginTop="16dp"
+        android:text="Mi Cartera"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/black"
-        android:layout_marginBottom="16dp"
-        android:textAlignment="center" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivWalletIcon" />
 
-    <!-- Descriptive Text -->
-    <TextView
-        android:layout_width="match_parent"
+    <!-- Tarjeta del Saldo -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSaldo"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Para poder recibir el dinero de las plazas que alquiles, necesitas conectar tu cuenta bancaria de forma segura a través de Stripe."
-        android:textSize="16sp"
-        android:textAlignment="center"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="#F5F5F5"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#E0E0E0"
+        app:strokeWidth="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-    <!-- ProgressBar for loading state -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saldo Disponible"
+                android:textColor="#666666"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvSaldoAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="0.00€"
+                android:textColor="@color/black"
+                android:textSize="48sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <ProgressBar
         android:id="@+id/progressBarStripe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:visibility="gone"
-        android:layout_marginBottom="16dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardSaldo" />
 
-    <!-- Big Eye-Catching Button -->
-    <Button
-        android:id="@+id/btnConfigurarStripe"
-        android:layout_width="match_parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRetirarSaldo"
+        android:layout_width="0dp"
         android:layout_height="60dp"
-        android:text="Configurar cuenta de cobros"
-        android:textSize="18sp"
+        android:layout_marginTop="32dp"
+        android:text="Retirar a mi cuenta bancaria"
+        android:textSize="16sp"
         android:textStyle="bold"
-        android:backgroundTint="#6200EE"
-        android:textColor="@android:color/white" />
+        app:backgroundTint="#1976D2"
+        app:cornerRadius="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressBarStripe" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tvConfigurarStripe"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Para recibir el dinero necesitas configurar tu cuenta de cobros. Toca aquí para configurar Stripe."
+        android:textAlignment="center"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnRetirarSaldo" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
