@@ -29,37 +29,47 @@ public class StripeService {
     public String crearAccountLink(Usuario usuario) throws Exception {
         String accountId = usuario.getStripeConnectId();
 
-        // 1. Si no tiene cuenta Express conectada, se la creamos
-        if (accountId == null || accountId.isEmpty()) {
-            AccountCreateParams accountParams = AccountCreateParams.builder()
-                    .setType(AccountCreateParams.Type.EXPRESS)
-                    .setEmail(usuario.getCorreo())
-                    .setCountry("ES")
-                    .setCapabilities(
-                            AccountCreateParams.Capabilities.builder()
-                                    .setCardPayments(AccountCreateParams.Capabilities.CardPayments.builder().setRequested(true).build())
-                                    .setTransfers(AccountCreateParams.Capabilities.Transfers.builder().setRequested(true).build())
-                                    .build()
-                    )
-                    .build();
+        try {
+            // 1. Si no tiene cuenta Express conectada, se la creamos
+            if (accountId == null || accountId.isEmpty()) {
+                AccountCreateParams accountParams = AccountCreateParams.builder()
+                        .setType(AccountCreateParams.Type.EXPRESS)
+                        .setEmail(usuario.getCorreo())
+                        .setCountry("ES")
+                        .setCapabilities(
+                                AccountCreateParams.Capabilities.builder()
+                                        .setCardPayments(AccountCreateParams.Capabilities.CardPayments.builder().setRequested(true).build())
+                                        .setTransfers(AccountCreateParams.Capabilities.Transfers.builder().setRequested(true).build())
+                                        .build()
+                        )
+                        .build();
 
-            Account account = Account.create(accountParams);
-            accountId = account.getId();
-            
-            // Guardamos el ID de Stripe en el usuario
-            usuario.setStripeConnectId(accountId);
-            usuarioRepositorio.save(usuario);
+                Account account = Account.create(accountParams);
+                accountId = account.getId();
+                
+                // Guardamos el ID de Stripe en el usuario
+                usuario.setStripeConnectId(accountId);
+                usuarioRepositorio.save(usuario);
+            }
+        } catch (Exception e) {
+            System.err.println("STRIPE ERROR CREANDO CUENTA: " + e.getMessage());
+            throw e;
         }
 
-        // 2. Generamos el enlace para el onboarding
-        AccountLinkCreateParams linkParams = AccountLinkCreateParams.builder()
-                .setAccount(accountId)
-                .setRefreshUrl("https://parkinghole.com/reintentar")
-                .setReturnUrl("https://parkinghole.com/exito")
-                .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
-                .build();
+        try {
+            // 2. Generamos el enlace para el onboarding
+            AccountLinkCreateParams linkParams = AccountLinkCreateParams.builder()
+                    .setAccount(accountId)
+                    .setRefreshUrl("https://example.com")
+                    .setReturnUrl("https://example.com")
+                    .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
+                    .build();
 
-        AccountLink accountLink = AccountLink.create(linkParams);
-        return accountLink.getUrl();
+            AccountLink accountLink = AccountLink.create(linkParams);
+            return accountLink.getUrl();
+        } catch (Exception e) {
+            System.err.println("STRIPE ERROR: " + e.getMessage());
+            throw e;
+        }
     }
 }

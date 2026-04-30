@@ -233,10 +233,10 @@ public class PagoControlador {
 
         } catch (com.stripe.exception.StripeException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Stripe Error: " + e.getUserMessage());
+            return ResponseEntity.badRequest().body("Stripe Error: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
