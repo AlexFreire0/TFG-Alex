@@ -40,13 +40,9 @@ class CarteraActivity : AppCompatActivity() {
 
         idUsuario = com.example.tfg.utils.SessionManager.getUsuarioId(this)
 
-        // Botón de Retirar (Simulación)
+        // Botón de Retirar (Stripe Express Dashboard)
         btnRetirarSaldo.setOnClickListener {
-            if (saldoActual > 0) {
-                Toast.makeText(this, "Simulando transferencia de ${String.format("%.2f€", saldoActual)} a tu cuenta...", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, "No tienes saldo suficiente para retirar", Toast.LENGTH_SHORT).show()
-            }
+            abrirPanelStripe()
         }
 
         // Link de configuración de Stripe
@@ -97,8 +93,10 @@ class CarteraActivity : AppCompatActivity() {
 
                     if (usuario.stripeConnectId.isNullOrEmpty()) {
                         tvConfigurarStripe.text = "Configurar cuenta de cobros"
+                        btnRetirarSaldo.visibility = View.GONE
                     } else {
                         tvConfigurarStripe.text = "Editar datos de cobro"
+                        btnRetirarSaldo.visibility = View.VISIBLE
                     }
                 } else {
                     Toast.makeText(this@CarteraActivity, "Error al cargar la cartera", Toast.LENGTH_SHORT).show()
@@ -110,6 +108,45 @@ class CarteraActivity : AppCompatActivity() {
                 Toast.makeText(this@CarteraActivity, "Error de red al conectar", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun abrirPanelStripe() {
+        if (idUsuario == -1L) return
+
+        btnRetirarSaldo.isEnabled = false
+        progressBarStripe.visibility = View.VISIBLE
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitClient.getApiService().generarPanelVendedor(idUsuario)
+                withContext(Dispatchers.Main) {
+                    progressBarStripe.visibility = View.GONE
+                    btnRetirarSaldo.isEnabled = true
+
+                    if (response.isSuccessful) {
+                        val url = response.body()?.get("url")
+                        if (!url.isNullOrEmpty()) {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(this@CarteraActivity, "No se encontró un navegador web.", Toast.LENGTH_LONG).show()
+                            }
+                        } else {
+                            Toast.makeText(this@CarteraActivity, "Respuesta vacía de Stripe.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this@CarteraActivity, "Error del servidor: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    progressBarStripe.visibility = View.GONE
+                    btnRetirarSaldo.isEnabled = true
+                    Toast.makeText(this@CarteraActivity, "Fallo de red: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun configurarStripe() {

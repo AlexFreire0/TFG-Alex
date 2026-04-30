@@ -258,6 +258,24 @@ public class PagoControlador {
                 .build();
     }
 
+    @GetMapping("/panel-vendedor/{idUsuario}")
+    public ResponseEntity<?> generarPanelVendedor(@PathVariable Long idUsuario) {
+        try {
+            Usuario usuario = usuarioRepositorio.findById(idUsuario)
+                    .orElseThrow(() -> new Exception("Usuario no encontrado"));
+            if (usuario.getStripeConnectId() == null || usuario.getStripeConnectId().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario no tiene cuenta Stripe configurada");
+            }
+            String url = stripeService.generarLoginLink(usuario.getStripeConnectId());
+            Map<String, String> response = new HashMap<>();
+            response.put("url", url);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
     @PostMapping("/capturar-pago/{paymentIntentId}")
     public ResponseEntity<?> capturarPago(@PathVariable String paymentIntentId) {
         try {

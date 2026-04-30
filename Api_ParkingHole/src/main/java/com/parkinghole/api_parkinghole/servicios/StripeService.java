@@ -4,6 +4,7 @@ import com.parkinghole.api_parkinghole.modelos.Usuario;
 import com.parkinghole.api_parkinghole.repositorio.UsuarioRepositorio;
 import com.stripe.model.Account;
 import com.stripe.model.AccountLink;
+import com.stripe.model.LoginLink;
 import com.stripe.param.AccountCreateParams;
 import com.stripe.param.AccountLinkCreateParams;
 import com.stripe.Stripe;
@@ -79,5 +80,14 @@ public class StripeService {
             System.err.println("STRIPE ERROR: " + e.getMessage());
             throw e;
         }
+    }
+
+    public String generarLoginLink(String stripeAccountId) throws Exception {
+        LoginLink link = LoginLink.createOnAccount(
+            stripeAccountId,
+            (com.stripe.param.LoginLinkCreateOnAccountParams) null,
+            null
+        );
+        return link.getUrl();
     }
 }

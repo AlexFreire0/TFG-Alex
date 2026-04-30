@@ -78,6 +78,9 @@ interface ApiService {
     @POST("api/pagos/crear-cuenta-vendedor/{idUsuario}")
     suspend fun crearCuentaVendedor(@Path("idUsuario") idUsuario: Long): Response<Map<String, String>>
 
+    @GET("api/pagos/panel-vendedor/{idUsuario}")
+    suspend fun generarPanelVendedor(@Path("idUsuario") idUsuario: Long): Response<Map<String, String>>
+
     // Actualizamos reservar para enviar el paymentIntentId
     @FormUrlEncoded
     @POST("api/intercambios/reservar/{id}")
