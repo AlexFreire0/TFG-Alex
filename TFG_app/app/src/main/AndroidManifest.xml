@@ -88,7 +88,21 @@
 
         <activity
             android:name=".activities.CarteraActivity"
-            android:exported="false"
-            android:label="Mi Cartera / Cobros" />
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:label="Mi Cartera / Cobros">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="parkinghole" android:host="onboarding-exito" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="parkinghole" android:host="onboarding-reintentar" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

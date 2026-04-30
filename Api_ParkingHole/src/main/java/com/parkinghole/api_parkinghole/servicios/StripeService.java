@@ -60,8 +60,8 @@ public class StripeService {
             // 2. Generamos el enlace para el onboarding
             AccountLinkCreateParams linkParams = AccountLinkCreateParams.builder()
                     .setAccount(accountId)
-                    .setRefreshUrl("https://example.com")
-                    .setReturnUrl("https://example.com")
+                    .setRefreshUrl("https://tfg-alex-732367725602.europe-west1.run.app/api/pagos/stripe-reintentar")
+                    .setReturnUrl("https://tfg-alex-732367725602.europe-west1.run.app/api/pagos/stripe-exito")
                     .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
                     .build();
 

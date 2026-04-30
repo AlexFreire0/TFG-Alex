@@ -59,6 +59,30 @@ class CarteraActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Error: Usuario no encontrado en preferencias", Toast.LENGTH_SHORT).show()
         }
+
+        manejarDeepLink(intent)
+    }
+
+    override fun onNewIntent(newIntent: Intent) {
+        super.onNewIntent(newIntent)
+        setIntent(newIntent)
+        manejarDeepLink(newIntent)
+    }
+
+    private fun manejarDeepLink(intent: Intent?) {
+        val uri = intent?.data
+        if (uri != null && uri.scheme == "parkinghole") {
+            when (uri.host) {
+                "onboarding-exito" -> {
+                    Toast.makeText(this, "¡Cuenta de Stripe configurada con éxito!", Toast.LENGTH_LONG).show()
+                }
+                "onboarding-reintentar" -> {
+                    Toast.makeText(this, "Configuración cancelada o incompleta. Inténtalo de nuevo.", Toast.LENGTH_LONG).show()
+                }
+            }
+            // Limpiamos el intent para evitar que el Toast vuelva a salir al rotar pantalla
+            setIntent(Intent())
+        }
     }
 
     private fun cargarSaldo() {

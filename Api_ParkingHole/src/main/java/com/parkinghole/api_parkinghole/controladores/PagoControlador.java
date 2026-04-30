@@ -240,6 +240,20 @@ public class PagoControlador {
         }
     }
 
+    @GetMapping("/stripe-exito")
+    public ResponseEntity<Void> stripeExito() {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "parkinghole://onboarding-exito")
+                .build();
+    }
+
+    @GetMapping("/stripe-reintentar")
+    public ResponseEntity<Void> stripeReintentar() {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "parkinghole://onboarding-reintentar")
+                .build();
+    }
+
     @PostMapping("/capturar-pago/{paymentIntentId}")
     public ResponseEntity<?> capturarPago(@PathVariable String paymentIntentId) {
         try {
