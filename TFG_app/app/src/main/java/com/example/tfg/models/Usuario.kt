@@ -14,5 +14,6 @@ data class Usuario(
     val activo: Boolean = true,
     // --- NUEVOS CAMPOS STRIPE ---
     val stripeCustomerId: String? = null,
-    val stripeConnectId: String? = null
+    val stripeConnectId: String? = null,
+    val saldo: Double? = 0.0
 ) : Parcelable

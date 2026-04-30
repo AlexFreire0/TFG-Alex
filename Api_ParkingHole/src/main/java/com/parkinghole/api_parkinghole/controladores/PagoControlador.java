@@ -79,6 +79,10 @@ public class PagoControlador {
             Usuario vendedor = usuarioRepositorio.findById(idVendedor)
                     .orElseThrow(() -> new Exception("Vendedor no encontrado"));
 
+            if (vendedor.getStripeConnectId() == null || vendedor.getStripeConnectId().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: El dueño de la plaza no ha configurado su cuenta bancaria. No se pueden procesar pagos.");
+            }
+
             // 2. --- LÓGICA DE RENTABILIDAD SEGURA ---
             // Leemos los precios EXACTOS de la base de datos
             Double precioTotal = intercambio.getPrecioTotalComprador();

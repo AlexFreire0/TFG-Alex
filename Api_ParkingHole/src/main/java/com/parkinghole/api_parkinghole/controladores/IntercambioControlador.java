@@ -63,6 +63,14 @@ public class IntercambioControlador {
     @PostMapping("/ofrecer")
     public ResponseEntity<?> ofrecerPlaza(@RequestBody Intercambio nuevoIntercambio) {
         try {
+            // Validar que el vendedor tiene cuenta de Stripe activa
+            Usuario vendedor = usuarioRepository.findById(nuevoIntercambio.getIdVendedor())
+                    .orElseThrow(() -> new Exception("Usuario no encontrado"));
+            if (vendedor.getStripeConnectId() == null || vendedor.getStripeConnectId().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Error: Debes configurar tu cuenta de Stripe (Monedero) antes de poder publicar plazas.");
+            }
+
             // --- LÓGICA DE TRANSPARENCIA DE COMISIONES ---
             Double ganancia = nuevoIntercambio.getGananciaVendedor();
             if (ganancia == null || ganancia < 0) ganancia = 0.0;

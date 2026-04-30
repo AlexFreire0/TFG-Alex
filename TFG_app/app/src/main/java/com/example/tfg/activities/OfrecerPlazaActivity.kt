@@ -25,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.content.Intent
 
 class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -93,7 +95,7 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
 
-        cargarCochesUsuario()
+        verificarStripe()
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -101,6 +103,57 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
         // Coordenadas base arbitrarias o de GPS idealmente.
         val latLngInicio = LatLng(40.4168, -3.7038)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLngInicio, 15f))
+    }
+
+    private fun verificarStripe() {
+        val usuario = SessionManager.getUsuarioLogueado(this)
+        if (usuario == null || usuario.uid == null) {
+            finish()
+            return
+        }
+
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val call = RetrofitClient.getApiService().obtenerUsuario(usuario.uid)
+                val response = call.execute()
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = View.GONE
+                    if (response.isSuccessful && response.body() != null) {
+                        val usuarioRemoto = response.body()!!
+                        if (usuarioRemoto.stripeConnectId.isNullOrEmpty()) {
+                            mostrarDialogoBloqueo()
+                        } else {
+                            cargarCochesUsuario()
+                        }
+                    } else {
+                        Toast.makeText(this@OfrecerPlazaActivity, "Error al verificar perfil.", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this@OfrecerPlazaActivity, "Fallo red: ${e.message}", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
+    }
+
+    private fun mostrarDialogoBloqueo() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Cuenta Incompleta")
+            .setMessage("Para poder recibir dinero por tus plazas, debes configurar tu cuenta bancaria en Stripe.")
+            .setCancelable(false)
+            .setPositiveButton("Ir a mi Cartera") { _, _ ->
+                startActivity(Intent(this, CarteraActivity::class.java))
+                finish()
+            }
+            .setNegativeButton("Cancelar") { _, _ ->
+                finish()
+            }
+            .show()
     }
 
     private fun cargarCochesUsuario() {
@@ -111,12 +164,14 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
             return
         }
 
+        binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val call = RetrofitClient.getApiService().obtenerMisCoches(usuario.uid)
                 val response = call.execute()
 
                 withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = View.GONE
                     if (response.isSuccessful && response.body() != null) {
                         listaCoches.clear()
                         listaCoches.addAll(response.body()!!)
@@ -132,6 +187,7 @@ class OfrecerPlazaActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
+                    binding.progressBar.visibility = View.GONE
                     Toast.makeText(this@OfrecerPlazaActivity, "Fallo conectividad: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }

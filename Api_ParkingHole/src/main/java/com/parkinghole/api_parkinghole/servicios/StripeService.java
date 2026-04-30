@@ -58,11 +58,19 @@ public class StripeService {
 
         try {
             // 2. Generamos el enlace para el onboarding
+            AccountLinkCreateParams.Type type = AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING;
+            if (accountId != null && !accountId.isEmpty()) {
+                Account retrievedAccount = Account.retrieve(accountId);
+                if (retrievedAccount.getDetailsSubmitted() != null && retrievedAccount.getDetailsSubmitted()) {
+                    type = AccountLinkCreateParams.Type.ACCOUNT_UPDATE;
+                }
+            }
+
             AccountLinkCreateParams linkParams = AccountLinkCreateParams.builder()
                     .setAccount(accountId)
                     .setRefreshUrl("https://tfg-alex-732367725602.europe-west1.run.app/api/pagos/stripe-reintentar")
                     .setReturnUrl("https://tfg-alex-732367725602.europe-west1.run.app/api/pagos/stripe-exito")
-                    .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
+                    .setType(type)
                     .build();
 
             AccountLink accountLink = AccountLink.create(linkParams);

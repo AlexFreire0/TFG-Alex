@@ -87,18 +87,25 @@ class CarteraActivity : AppCompatActivity() {
 
     private fun cargarSaldo() {
         progressBarStripe.visibility = View.VISIBLE
-        RetrofitClient.getApiService().obtenerSaldo(idUsuario).enqueue(object : Callback<Double> {
-            override fun onResponse(call: Call<Double>, response: Response<Double>) {
+        RetrofitClient.getApiService().obtenerUsuario(idUsuario).enqueue(object : Callback<com.example.tfg.models.Usuario> {
+            override fun onResponse(call: Call<com.example.tfg.models.Usuario>, response: Response<com.example.tfg.models.Usuario>) {
                 progressBarStripe.visibility = View.GONE
                 if (response.isSuccessful && response.body() != null) {
-                    saldoActual = response.body()!!
+                    val usuario = response.body()!!
+                    saldoActual = usuario.saldo ?: 0.0
                     tvSaldoAmount.text = String.format("%.2f€", saldoActual)
+
+                    if (usuario.stripeConnectId.isNullOrEmpty()) {
+                        tvConfigurarStripe.text = "Configurar cuenta de cobros"
+                    } else {
+                        tvConfigurarStripe.text = "Editar datos de cobro"
+                    }
                 } else {
-                    Toast.makeText(this@CarteraActivity, "Error al cargar el saldo", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@CarteraActivity, "Error al cargar la cartera", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<Double>, t: Throwable) {
+            override fun onFailure(call: Call<com.example.tfg.models.Usuario>, t: Throwable) {
                 progressBarStripe.visibility = View.GONE
                 Toast.makeText(this@CarteraActivity, "Error de red al conectar", Toast.LENGTH_SHORT).show()
             }

@@ -86,4 +86,11 @@ public class UsuarioControlador {
                 .map(u -> ResponseEntity.ok(u.getSaldo() != null ? u.getSaldo() : 0.0))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> obtenerUsuario(@PathVariable Long id) {
+        return servicioUsuario.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

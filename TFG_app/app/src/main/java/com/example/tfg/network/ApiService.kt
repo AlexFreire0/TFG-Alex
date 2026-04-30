@@ -91,6 +91,9 @@ interface ApiService {
     @GET("api/usuarios/{id}/saldo")
     fun obtenerSaldo(@Path("id") idUsuario: Long): Call<Double>
 
+    @GET("api/usuarios/{id}")
+    fun obtenerUsuario(@Path("id") idUsuario: Long): Call<Usuario>
+
     @retrofit2.http.PATCH("api/intercambios/{id}/calificar")
     suspend fun calificarIntercambio(
         @Path("id") id: Long,
