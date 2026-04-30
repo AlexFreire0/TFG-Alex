@@ -6,7 +6,10 @@ import com.stripe.model.Account;
 import com.stripe.model.AccountLink;
 import com.stripe.param.AccountCreateParams;
 import com.stripe.param.AccountLinkCreateParams;
+import com.stripe.Stripe;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +17,14 @@ public class StripeService {
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
+
+    @Value("${stripe.api.key}")
+    private String stripeApiKey;
+
+    @PostConstruct
+    public void init() {
+        Stripe.apiKey = stripeApiKey;
+    }
 
     public String crearAccountLink(Usuario usuario) throws Exception {
         String accountId = usuario.getStripeConnectId();
@@ -23,6 +34,7 @@ public class StripeService {
             AccountCreateParams accountParams = AccountCreateParams.builder()
                     .setType(AccountCreateParams.Type.EXPRESS)
                     .setEmail(usuario.getCorreo())
+                    .setCountry("ES")
                     .setCapabilities(
                             AccountCreateParams.Capabilities.builder()
                                     .setCardPayments(AccountCreateParams.Capabilities.CardPayments.builder().setRequested(true).build())
