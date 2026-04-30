@@ -38,8 +38,7 @@ class CarteraActivity : AppCompatActivity() {
         progressBarStripe = findViewById(R.id.progressBarStripe)
         tvSaldoAmount = findViewById(R.id.tvSaldoAmount)
 
-        val prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-        idUsuario = prefs.getLong("id", -1L)
+        idUsuario = com.example.tfg.utils.SessionManager.getUsuarioId(this)
 
         // Botón de Retirar (Simulación)
         btnRetirarSaldo.setOnClickListener {
@@ -83,7 +82,10 @@ class CarteraActivity : AppCompatActivity() {
     }
 
     private fun configurarStripe() {
-        if (idUsuario == -1L) return
+        if (idUsuario == -1L) {
+            Toast.makeText(this, "Sesión no válida. Inicia sesión de nuevo.", Toast.LENGTH_LONG).show()
+            return
+        }
 
         // Disable interaction and show progress bar
         tvConfigurarStripe.isEnabled = false
@@ -102,10 +104,14 @@ class CarteraActivity : AppCompatActivity() {
                         val url = body?.get("url")
 
                         if (!url.isNullOrEmpty()) {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            startActivity(intent)
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(this@CarteraActivity, "No se encontró un navegador web para abrir el enlace.", Toast.LENGTH_LONG).show()
+                            }
                         } else {
-                            Toast.makeText(this@CarteraActivity, "La respuesta no contiene una URL válida", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@CarteraActivity, "La respuesta no contiene una URL válida.", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(this@CarteraActivity, "Error del servidor: ${response.code()}", Toast.LENGTH_SHORT).show()

@@ -8,8 +8,6 @@ import com.parkinghole.api_parkinghole.repositorio.IntercambioRepositorio;
 import com.parkinghole.api_parkinghole.repositorio.UsuarioRepositorio;
 import com.parkinghole.api_parkinghole.servicios.NotificationService;
 import com.stripe.Stripe;
-import com.stripe.model.Account;
-import com.stripe.model.AccountLink;
 import com.stripe.model.Customer;
 import com.stripe.model.EphemeralKey;
 import com.stripe.model.Event;
@@ -17,8 +15,6 @@ import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
 import com.stripe.net.Webhook;
-import com.stripe.param.AccountCreateParams;
-import com.stripe.param.AccountLinkCreateParams;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.EphemeralKeyCreateParams;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -51,6 +47,9 @@ public class PagoControlador {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private com.parkinghole.api_parkinghole.servicios.StripeService stripeService;
 
     @PostConstruct
     public void init() {
@@ -224,39 +223,12 @@ public class PagoControlador {
     public ResponseEntity<?> crearCuentaVendedor(@PathVariable Long idUsuario) {
         try {
             Usuario usuario = usuarioRepositorio.findById(idUsuario)
-                    .orElseThrow(() -> new Exception("Usuario no encontrado"));
+                    .orElseThrow(() -> new Exception("Usuario no encontrado en la base de datos"));
 
-            String accountId = usuario.getStripeConnectId();
-
-            if (accountId == null || accountId.isEmpty()) {
-                AccountCreateParams accountParams = AccountCreateParams.builder()
-                        .setType(AccountCreateParams.Type.EXPRESS)
-                        .setEmail(usuario.getCorreo())
-                        .setCapabilities(
-                                AccountCreateParams.Capabilities.builder()
-                                        .setCardPayments(AccountCreateParams.Capabilities.CardPayments.builder().setRequested(true).build())
-                                        .setTransfers(AccountCreateParams.Capabilities.Transfers.builder().setRequested(true).build())
-                                        .build()
-                        )
-                        .build();
-
-                Account account = Account.create(accountParams);
-                accountId = account.getId();
-                usuario.setStripeConnectId(accountId);
-                usuarioRepositorio.save(usuario);
-            }
-
-            AccountLinkCreateParams linkParams = AccountLinkCreateParams.builder()
-                    .setAccount(accountId)
-                    .setRefreshUrl("https://tudominio.com/reintentar")
-                    .setReturnUrl("https://tudominio.com/exito")
-                    .setType(AccountLinkCreateParams.Type.ACCOUNT_ONBOARDING)
-                    .build();
-
-            AccountLink accountLink = AccountLink.create(linkParams);
+            String urlStripe = stripeService.crearAccountLink(usuario);
 
             Map<String, String> response = new HashMap<>();
-            response.put("url", accountLink.getUrl());
+            response.put("url", urlStripe);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
