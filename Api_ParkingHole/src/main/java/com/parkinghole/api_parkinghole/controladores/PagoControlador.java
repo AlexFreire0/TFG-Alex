@@ -270,6 +270,9 @@ public class PagoControlador {
             Map<String, String> response = new HashMap<>();
             response.put("url", url);
             return ResponseEntity.ok(response);
+        } catch (com.stripe.exception.StripeException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Stripe Error: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

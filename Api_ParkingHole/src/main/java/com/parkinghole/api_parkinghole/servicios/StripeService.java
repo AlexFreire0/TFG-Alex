@@ -7,6 +7,7 @@ import com.stripe.model.AccountLink;
 import com.stripe.model.LoginLink;
 import com.stripe.param.AccountCreateParams;
 import com.stripe.param.AccountLinkCreateParams;
+import com.stripe.param.LoginLinkCreateOnAccountParams;
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,11 +84,17 @@ public class StripeService {
     }
 
     public String generarLoginLink(String stripeAccountId) throws Exception {
-        LoginLink link = LoginLink.createOnAccount(
-            stripeAccountId,
-            (com.stripe.param.LoginLinkCreateOnAccountParams) null,
-            null
-        );
-        return link.getUrl();
+        try {
+            System.out.println("Generando link para la cuenta: " + stripeAccountId);
+            LoginLink link = LoginLink.createOnAccount(
+                stripeAccountId,
+                LoginLinkCreateOnAccountParams.builder().build(),
+                null
+            );
+            return link.getUrl();
+        } catch (com.stripe.exception.StripeException e) {
+            System.err.println("ERROR STRIPE LOGIN: " + e.getMessage());
+            throw e;
+        }
     }
 }
