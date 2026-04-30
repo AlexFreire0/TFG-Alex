@@ -79,6 +79,10 @@ public class ServicioUsuario {
         return usuarioRepositorio.findByCorreo(correo);
     }
 
+    public Optional<Usuario> findById(Long id) {
+        return usuarioRepositorio.findById(id);
+    }
+
     public Usuario save(Usuario usuario) {
         return usuarioRepositorio.save(usuario);
     }

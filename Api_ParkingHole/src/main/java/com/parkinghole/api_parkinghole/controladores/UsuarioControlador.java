@@ -82,7 +82,7 @@ public class UsuarioControlador {
 
     @GetMapping("/{id}/saldo")
     public ResponseEntity<Double> obtenerSaldo(@PathVariable Long id) {
-        return servicioUsuario.findByUid(id)
+        return servicioUsuario.findById(id)
                 .map(u -> ResponseEntity.ok(u.getSaldo() != null ? u.getSaldo() : 0.0))
                 .orElse(ResponseEntity.notFound().build());
     }
